@@ -10,6 +10,7 @@ import (
 	"runtime/debug"
 	"strconv"
 	"syscall"
+	"time"
 	"unsafe"
 
 	"github.com/google/syzkaller/pkg/osutil"
@@ -41,6 +42,15 @@ func init() {
 func checkCoverage() string {
 	if reason := checkDebugFS(); reason != "" {
 		return reason
+	}
+
+	// Wait for KCOV to be mounted.
+	var kcovTimeout = time.Minute * 5
+	for start := time.Now(); time.Since(start) < kcovTimeout; {
+		if osutil.IsExist("/sys/kernel/debug/kcov") {
+			break
+		}
+		time.Sleep(time.Second)
 	}
 	if !osutil.IsExist("/sys/kernel/debug/kcov") {
 		return "CONFIG_KCOV is not enabled"
