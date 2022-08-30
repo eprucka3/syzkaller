@@ -109,6 +109,15 @@ func checkCoverageFeature(feature int) (reason string) {
 	// TODO(dvyukov): this should run under target arch.
 	// E.g. KCOV ioctls were initially not supported on 386 (missing compat_ioctl),
 	// and a 386 executor won't be able to use them, but an amd64 fuzzer will be.
+	// Wait for KCOV to be mounted.
+	var kcovTimeout = time.Minute * 20
+	for start := time.Now(); time.Since(start) < kcovTimeout; {
+		_, err := syscall.Open("/sys/kernel/debug/kcov", syscall.O_RDWR, 0)
+		if err == nil {
+			break
+		}
+		time.Sleep(time.Second)
+	}
 	fd, err := syscall.Open("/sys/kernel/debug/kcov", syscall.O_RDWR, 0)
 	if err != nil {
 		return "CONFIG_KCOV is not enabled"
