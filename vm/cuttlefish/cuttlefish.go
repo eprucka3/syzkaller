@@ -81,6 +81,9 @@ func (pool *Pool) Create(workdir string, index int) (vmimpl.Instance, error) {
 		return nil, fmt.Errorf("failed to get root access to device: %s", err)
 	}
 
+	if err := inst.runOnHost(5*time.Minute, adb.Shell("test -f /sys/kernel/debug/kcov"); err != nil {
+		return nil, fmt.Errorf("failed to access /sys/kernel/debug/kcov: %s", err)
+
 	return inst, nil
 }
 
