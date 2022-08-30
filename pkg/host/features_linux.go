@@ -45,7 +45,7 @@ func checkCoverage() string {
 	}
 
 	// Wait for KCOV to be mounted.
-	var kcovTimeout = time.Minute * 20
+	var kcovTimeout = time.Minute * 5
 	for start := time.Now(); time.Since(start) < kcovTimeout; {
 		if osutil.IsExist("/sys/kernel/debug/kcov") {
 			break
@@ -110,7 +110,7 @@ func checkCoverageFeature(feature int) (reason string) {
 	// E.g. KCOV ioctls were initially not supported on 386 (missing compat_ioctl),
 	// and a 386 executor won't be able to use them, but an amd64 fuzzer will be.
 	// Wait for KCOV to be mounted.
-	var kcovTimeout = time.Minute * 20
+	var kcovTimeout = time.Minute * 5
 	for start := time.Now(); time.Since(start) < kcovTimeout; {
 		_, err := syscall.Open("/sys/kernel/debug/kcov", syscall.O_RDWR, 0)
 		if err == nil {
