@@ -45,7 +45,7 @@ func checkCoverage() string {
 	}
 
 	// Wait for KCOV to be mounted.
-	var kcovTimout = time.Minute * 5
+	var kcovTimeout = time.Minute * 5
 	for start := time.Now(); time.Since(start) < kcovTimeout; {
 		if osutil.IsExist("/sys/kernel/debug/kcov") {
 			break
