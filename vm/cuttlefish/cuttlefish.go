@@ -13,15 +13,18 @@ package cuttlefish
 import (
 	"fmt"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/syzkaller/pkg/log"
+	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/pkg/report"
 	"github.com/google/syzkaller/vm/vmimpl"
 )
 
 const (
 	deviceRoot = "/data/fuzz"
+	kernelLog  = "/root/cuttlefish/instances/cvd-1/kernel.log"
 )
 
 func init() {
@@ -157,9 +160,51 @@ func (inst *instance) Close() {
 	inst.gceInst.Close()
 }
 
+// Check if the device is cuttlefish on remote vm.
+func isRemoteCuttlefish(dev string) (bool, string) {
+	if !strings.Contains(dev, ":") {
+		return false, ""
+	}
+	ip := strings.Split(dev, ":")[0]
+	if ip == "localhost" || ip == "0.0.0.0" || ip == "127.0.0.1" {
+		return false, ip
+	}
+	return true, ip
+}
+
 func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command string) (
 	<-chan []byte, <-chan error, error) {
-	return inst.gceInst.Run(timeout, stop, fmt.Sprintf("adb shell 'cd %s; %s'", deviceRoot, command))
+
+	gceOutc, gceErrc, gceErr := inst.gceInst.Run(timeout, stop, fmt.Sprintf("adb shell 'cd %s; %s'", deviceRoot, command))
+
+	tempKernelLog, err := osutil.TempFile("kernelLog")
+	if err != nil {
+		return nil, nil, fmt.Errorf("failed to create temp file for kernel log: %v", err)
+	}
+
+	gceStop := make(chan bool)
+
+	ok, ip := isRemoteCuttlefish(inst.gceInst.device)
+	if !ok {
+		return nil, nil, fmt.Errorf("device not found")
+	}
+
+	vmimpl.OpenRemoteKernelLog(ip, kernelLog)
+
+	// copyArgs := append(inst.gceInst.SCPArgs(inst.gceInst.debug, inst.gceInst.sshKey, 22), inst.gceInst.sshUser+"@"+ip+":"+kernelLog, tempKernelLog)
+	// log.Logf(1, "LIZ: Copy args: %s", copyArgs)
+	// conOutc, conErrc, conErr := inst.gceInst.Run(timeout, gceStop, copyArgs)
+	// if conErr != nil {
+	// 	return nil, nil, fmt.Errorf("failed to copy kernel log; cmd: %v; %v", copyArgs, conErr)
+	// }
+
+	// outcBytes, err := ioutil.ReadFile(tempKernelLog)
+	// outc := make(chan []byte, 1000)
+	// outc <- outcBytes
+
+	// //TODO: Remove temp file
+
+	return outc, gceErrc, gceErr
 }
 
 func (inst *instance) Diagnose(rep *report.Report) ([]byte, bool) {
