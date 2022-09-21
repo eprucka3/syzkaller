@@ -497,9 +497,7 @@ func uploadImageToGCS(localImage, gcsImage string) error {
 }
 
 func runCmd(debug bool, bin string, args ...string) error {
-	if debug {
-		log.Logf(0, "running command: %v %#v", bin, args)
-	}
+	log.Logf(0, "LIZ: running command: %v %#v", bin, args)
 	output, err := osutil.RunCmd(time.Minute, "", bin, args...)
 	if debug {
 		log.Logf(0, "result: %v\n%s", err, output)
