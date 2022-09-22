@@ -161,53 +161,52 @@ func (inst *instance) Close() {
 func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command string) (
 	<-chan []byte, <-chan error, error) {
 
-	outc := make(chan []byte, 1000)
-	errc := make(chan error, 1)
+	return inst.gceInst.Run(timeout, stop, fmt.Sprintf("tail -f %s", kernelLog))
 
-	conStop := make(chan bool)
-	gceStop := make(chan bool)
+	// outc := make(chan []byte, 1000)
+	// errc := make(chan error, 1)
 
-	log.Logf(0, "KRIS: starting tail")
-	log.Logf(0, "LIZ: cmd: tail -f %v", kernelLog)
-	conOutc, conErrc, conErr := inst.gceInst.Run(timeout, conStop, fmt.Sprintf("tail -f %s", kernelLog))
-	if conErr != nil {
-		return nil, nil, fmt.Errorf("console: %s", conErr)
-	}
+	// conStop := make(chan bool)
+	// gceStop := make(chan bool)
 
-	log.Logf(0, "KRIS: starting %q", command)
-	gceOutc, gceErrc, gceErr := inst.gceInst.Run(timeout, gceStop, fmt.Sprintf("adb shell 'cd %s; %s'", deviceRoot, command))
-	if gceErr != nil {
-		return nil, nil, fmt.Errorf("gce: %s", gceErr)
-	}
+	// log.Logf(0, "KRIS: starting %q", command)
+	// gceOutc, gceErrc, gceErr := inst.gceInst.Run(timeout, gceStop, fmt.Sprintf("adb shell 'cd %s; %s'", deviceRoot, command))
+	// if gceErr != nil {
+	// 	return nil, nil, fmt.Errorf("gce: %s", gceErr)
+	// }
+	// log.Logf(0, "KRIS: starting tail")
+	// conOutc, conErrc, conErr := inst.gceInst.Run(timeout, conStop, fmt.Sprintf("adb wait-for-device"))
+	// // conOutc, conErrc, conErr := inst.gceInst.Run(timeout, conStop, fmt.Sprintf("echo \"$(tail -f %s)\"", kernelLog))
+	// if conErr != nil {
+	// 	return nil, nil, fmt.Errorf("console: %s", conErr)
+	// }
 
-	time.Sleep(8 * time.Hour)
+	// go func() {
+	// 	for {
+	// 		select {
+	// 		case out := <-conOutc:
+	// 			log.Logf(0, "KRIS: read %q from console", out)
+	// 			outc <- out
+	// 		case out := <-gceOutc:
+	// 			log.Logf(0, "KRIS: read %q from command %q", out, command)
+	// 			outc <- out
+	// 		case err := <-conErrc:
+	// 			log.Logf(0, "KRIS: got error %s from console", err)
+	// 			errc <- err
+	// 			return
+	// 		case err := <-gceErrc:
+	// 			log.Logf(0, "KRIS: got error %s from command %q", err, command)
+	// 			errc <- err
+	// 			return
+	// 		case <-stop:
+	// 			conStop <- true
+	// 			gceStop <- true
+	// 			return
+	// 		}
+	// 	}
+	// }()
 
-	go func() {
-		for {
-			select {
-			case out := <-conOutc:
-				log.Logf(0, "KRIS: read %q from console", out)
-				outc <- out
-			case out := <-gceOutc:
-				log.Logf(0, "KRIS: read %q from command %q", out, command)
-				outc <- out
-			case err := <-conErrc:
-				log.Logf(0, "KRIS: got error %s from console", err)
-				errc <- err
-				return
-			case err := <-gceErrc:
-				log.Logf(0, "KRIS: got error %s from command %q", err, command)
-				errc <- err
-				return
-			case <-stop:
-				conStop <- true
-				gceStop <- true
-				return
-			}
-		}
-	}()
-
-	return outc, errc, nil
+	// return outc, errc, nil
 }
 
 func (inst *instance) Diagnose(rep *report.Report) ([]byte, bool) {

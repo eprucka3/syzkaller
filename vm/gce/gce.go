@@ -219,6 +219,7 @@ func (inst *instance) Copy(hostSrc string) (string, error) {
 
 func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command string) (
 	<-chan []byte, <-chan error, error) {
+	log.Logf(0, "LIZ_TESTING: In Run: %s", command)
 	conRpipe, conWpipe, err := osutil.LongPipe()
 	if err != nil {
 		return nil, nil, err
@@ -237,6 +238,7 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 	if err != nil {
 		conRpipe.Close()
 		conWpipe.Close()
+		log.Logf(0, "LIZ_TESTING: 240")
 		return nil, nil, err
 	}
 	if inst.consolew != nil {
@@ -246,6 +248,7 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 	if err := con.Start(); err != nil {
 		conRpipe.Close()
 		conWpipe.Close()
+		log.Logf(0, "LIZ_TESTING: 250")
 		return nil, nil, fmt.Errorf("failed to connect to console server: %v", err)
 	}
 	conWpipe.Close()
@@ -263,6 +266,7 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 	if err := waitForConsoleConnect(merger); err != nil {
 		con.Process.Kill()
 		merger.Wait()
+		log.Logf(0, "LIZ_TESTING: 268")
 		return nil, nil, err
 	}
 	sshRpipe, sshWpipe, err := osutil.LongPipe()
@@ -270,6 +274,7 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 		con.Process.Kill()
 		merger.Wait()
 		sshRpipe.Close()
+		log.Logf(0, "LIZ_TESTING: 276")
 		return nil, nil, err
 	}
 	ssh := osutil.Command("ssh", inst.sshArgs(command)...)
@@ -296,8 +301,11 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 	go func() {
 		select {
 		case <-time.After(timeout):
+			log.Logf(0, "LIZ_TESTING: 303")
+			log.Logf(0, "LIZ_TESTING: timeout:%v", timeout)
 			signal(vmimpl.ErrTimeout)
 		case <-stop:
+			log.Logf(0, "LIZ_TESTING: 308")
 			signal(vmimpl.ErrTimeout)
 		case <-inst.closed:
 			signal(fmt.Errorf("instance closed"))
@@ -314,6 +322,8 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 				// Console connection must never fail. If it does, it's either
 				// instance preemption or a GCE bug. In either case, not a kernel bug.
 				log.Logf(0, "%v: gce console connection failed with %v", inst.name, merr.Err)
+				log.Logf(0, "LIZ_TESTING: in Merger Error. cmd: %v", command)
+				log.Logf(0, "LIZ_TESTING: ssh error: %v", cmdErr)
 				err = vmimpl.ErrTimeout
 			} else {
 				// Check if the instance was terminated due to preemption or host maintenance.
