@@ -168,6 +168,7 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 	gceStop := make(chan bool)
 
 	log.Logf(0, "KRIS: starting tail")
+	log.Logf(0, "LIZ: cmd: tail -f %v", kernelLog)
 	conOutc, conErrc, conErr := inst.gceInst.Run(timeout, conStop, fmt.Sprintf("tail -f %s", kernelLog))
 	if conErr != nil {
 		return nil, nil, fmt.Errorf("console: %s", conErr)
@@ -178,6 +179,8 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 	if gceErr != nil {
 		return nil, nil, fmt.Errorf("gce: %s", gceErr)
 	}
+
+	time.Sleep(8 * time.Hour)
 
 	go func() {
 		for {
