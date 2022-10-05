@@ -20,6 +20,7 @@ import (
 	"time"
 
 	"github.com/google/syzkaller/pkg/auth"
+	"github.com/google/syzkaller/pkg/log"
 )
 
 type Dashboard struct {
@@ -691,6 +692,7 @@ func (dash *Dashboard) queryImpl(method string, req, reply interface{}) error {
 		}
 		reflect.ValueOf(reply).Elem().Set(reflect.New(typ.Elem()).Elem())
 	}
+	log.Logf(0, "LIZ_TESTING: in queryImpl")
 	values := make(url.Values)
 	values.Add("client", dash.Client)
 	values.Add("key", dash.Key)

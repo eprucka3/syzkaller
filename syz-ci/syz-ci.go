@@ -245,10 +245,14 @@ func main() {
 			}()
 		}
 	}
+	log.Logf(0, "LIZ_TESTING: created managers")
+
 	jp, err := newJobProcessor(cfg, managers, stop, shutdownPending)
 	if err != nil {
 		log.Fatalf("failed to create dashapi connection %v", err)
 	}
+	log.Logf(0, "LIZ_TESTING: created job processor")
+
 	wg.Add(1)
 	go func() {
 		defer wg.Done()

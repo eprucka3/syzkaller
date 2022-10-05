@@ -95,6 +95,7 @@ loop:
 }
 
 func (jp *JobProcessor) pollCommits() {
+	log.Logf(0, "LIZ_TESTING: in jobs poll commits")
 	for _, mgr := range jp.managers {
 		if !mgr.mgrcfg.Jobs.PollCommits {
 			continue
@@ -112,7 +113,9 @@ func brokenRepo(url string) bool {
 }
 
 func (jp *JobProcessor) pollManagerCommits(mgr *Manager) error {
+	log.Logf(0, "LIZ_TESTING: in pollManagerCommits")
 	resp, err := mgr.dash.CommitPoll()
+	log.Logf(0, "LIZ_TESTING: polled dash manager commits")
 	if err != nil {
 		return err
 	}
@@ -174,6 +177,7 @@ func (jp *JobProcessor) pollManagerCommits(mgr *Manager) error {
 }
 
 func (jp *JobProcessor) pollRepo(mgr *Manager, URL, branch, reportEmail string) ([]*vcs.Commit, error) {
+	log.Logf(0, "LIZ_TESTING: In jobs pollRepo")
 	dir := osutil.Abs(filepath.Join("jobs", mgr.managercfg.TargetOS, "kernel"))
 	repo, err := vcs.NewRepo(mgr.managercfg.TargetOS, mgr.managercfg.Type, dir)
 	if err != nil {
@@ -186,6 +190,7 @@ func (jp *JobProcessor) pollRepo(mgr *Manager, URL, branch, reportEmail string) 
 }
 
 func (jp *JobProcessor) getCommitInfo(mgr *Manager, URL, branch string, commits []string) ([]*vcs.Commit, error) {
+	log.Logf(0, "LIZ_TESTING: in jobs getCommitInfo")
 	dir := osutil.Abs(filepath.Join("jobs", mgr.managercfg.TargetOS, "kernel"))
 	repo, err := vcs.NewRepo(mgr.managercfg.TargetOS, mgr.managercfg.Type, dir)
 	if err != nil {
@@ -205,6 +210,7 @@ func (jp *JobProcessor) getCommitInfo(mgr *Manager, URL, branch string, commits 
 }
 
 func (jp *JobProcessor) pollJobs() {
+	log.Logf(0, "LIZ_TESTING: in pollJobs()")
 	poll := &dashapi.JobPollReq{
 		Managers: make(map[string]dashapi.ManagerJobs),
 	}
@@ -250,6 +256,7 @@ func (jp *JobProcessor) pollJobs() {
 }
 
 func (jp *JobProcessor) processJob(job *Job) {
+	log.Logf(0, "LIZ_TESTING: in processJob")
 	select {
 	case kernelBuildSem <- struct{}{}:
 	case <-jp.stop:
@@ -286,6 +293,7 @@ type Job struct {
 
 func (jp *JobProcessor) process(job *Job) *dashapi.JobDoneReq {
 	req, mgr := job.req, job.mgr
+	log.Logf(0, "LIZ_TESTING: in jobs process")
 
 	dir := osutil.Abs(filepath.Join("jobs", mgr.managercfg.TargetOS))
 	mgrcfg := new(mgrconfig.Config)
@@ -372,6 +380,7 @@ func (jp *JobProcessor) process(job *Job) *dashapi.JobDoneReq {
 
 func (jp *JobProcessor) bisect(job *Job, mgrcfg *mgrconfig.Config) error {
 	req, resp, mgr := job.req, job.resp, job.mgr
+	log.Logf(0, "LIZ_TESTING: in bisect")
 
 	// Hack: if the manager has only, say, 5 VMs, but bisect wants 10, try to override number of VMs to 10.
 	// OverrideVMCount is opportunistic and should do it only if it's safe.
@@ -497,6 +506,7 @@ func (jp *JobProcessor) bisect(job *Job, mgrcfg *mgrconfig.Config) error {
 func (jp *JobProcessor) testPatch(job *Job, mgrcfg *mgrconfig.Config) error {
 	req, resp, mgr := job.req, job.resp, job.mgr
 	env, err := instance.NewEnv(mgrcfg)
+	log.Logf(0, "LIZ_TESTING: in testPatch")
 	if err != nil {
 		return err
 	}

@@ -633,6 +633,7 @@ func (mgr *Manager) createDashboardBuild(info *BuildInfo, imageDir, typ string) 
 // open bugs) and returns subset of these commits that are present in a build
 // on commit buildCommit.
 func (mgr *Manager) pollCommits(buildCommit string) ([]string, []dashapi.Commit, error) {
+	log.Logf(0, "LIZ_TESTING: In manager pollCommits")
 	resp, err := mgr.dash.BuilderPoll(mgr.name)
 	if err != nil || len(resp.PendingCommits) == 0 && resp.ReportEmail == "" {
 		return nil, nil, err
