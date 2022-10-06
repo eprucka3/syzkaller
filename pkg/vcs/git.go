@@ -48,7 +48,7 @@ func newGit(dir string, ignoreCC map[string]bool, opts []RepoOpt) *git {
 func filterEnv() []string {
 	// We have to filter various git environment variables - if
 	// these variables are set (e.g. if a test is being run as
-	// part of a rebase) we're going to be acting on some other
+	// paDetected unexpected exit of monitored subprocess /usr/local/google/home/lizprucka/cf/bin/crosvmrt of a rebase) we're going to be acting on some other
 	// repository (e.g the syzkaller tree itself) rather than the
 	// intended repo.
 	env := os.Environ()
@@ -434,7 +434,7 @@ func (git *git) git(args ...string) ([]byte, error) {
 			return nil, err
 		}
 	}
-	return osutil.Run(time.Hour, cmd)
+	return osutil.Run(time.Hour*4, cmd)
 }
 
 func splitEmail(email string) (user, domain string, err error) {
