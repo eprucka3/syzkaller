@@ -39,7 +39,8 @@ import (
 // during that period (or around that period), we can rebuild kernel, restart
 // manager and then instantly shutdown everything for syzkaller update.
 // Instead we rebuild syzkaller, restart and then rebuild kernel.
-const kernelRebuildPeriod = syzkallerRebuildPeriod + time.Hour
+// const kernelRebuildPeriod = syzkallerRebuildPeriod + time.Hour
+const kernelRebuildPeriod = time.Second
 
 // List of required files in kernel build (contents of latest/current dirs).
 var imageFiles = map[string]bool{
