@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/pkg/report"
 	"github.com/google/syzkaller/vm/gce"
@@ -76,6 +77,8 @@ func (pool *Pool) Create(workdir string, index int) (vmimpl.Instance, error) {
 	}
 
 	// Start a Cuttlefish device on the GCE instance.
+	time.Sleep(8 * time.Hour)
+	log.Logf(0, "LIZ_TESTING: SLEEP")
 	if err := inst.runOnHost(10*time.Minute,
 		fmt.Sprintf("./bin/launch_cvd -daemon -kernel_path=./bzImage -initramfs_path=./initramfs.img"+
 			" --noenable_sandbox -report_anonymous_usage_stats=n")); err != nil {
