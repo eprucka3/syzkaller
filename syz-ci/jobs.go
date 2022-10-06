@@ -174,6 +174,7 @@ func (jp *JobProcessor) pollManagerCommits(mgr *Manager) error {
 }
 
 func (jp *JobProcessor) pollRepo(mgr *Manager, URL, branch, reportEmail string) ([]*vcs.Commit, error) {
+	log.Logf(0, "LIZ_TESTING: jobs 177")
 	dir := osutil.Abs(filepath.Join("jobs", mgr.managercfg.TargetOS, "kernel"))
 	repo, err := vcs.NewRepo(mgr.managercfg.TargetOS, mgr.managercfg.Type, dir)
 	if err != nil {
@@ -186,6 +187,7 @@ func (jp *JobProcessor) pollRepo(mgr *Manager, URL, branch, reportEmail string) 
 }
 
 func (jp *JobProcessor) getCommitInfo(mgr *Manager, URL, branch string, commits []string) ([]*vcs.Commit, error) {
+	log.Logf(0, "LIZ_TESTING: jobs 190")
 	dir := osutil.Abs(filepath.Join("jobs", mgr.managercfg.TargetOS, "kernel"))
 	repo, err := vcs.NewRepo(mgr.managercfg.TargetOS, mgr.managercfg.Type, dir)
 	if err != nil {
@@ -205,6 +207,7 @@ func (jp *JobProcessor) getCommitInfo(mgr *Manager, URL, branch string, commits 
 }
 
 func (jp *JobProcessor) pollJobs() {
+	log.Logf(0, "LIZ_TESTING: jobs 210")
 	poll := &dashapi.JobPollReq{
 		Managers: make(map[string]dashapi.ManagerJobs),
 	}
