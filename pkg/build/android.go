@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/sys/targets"
 )
@@ -136,6 +137,7 @@ func (a android) build(params Params) (ImageDetails, error) {
 		return details, fmt.Errorf("sysctl file is not supported for android cuttlefish images")
 	}
 
+	log.Logf(0, "LIZ_TESTING: Config: %v", params.Config)
 	// Parse input config
 	var paramsConfig ParamsConfig
 	json.Unmarshal(params.Config, &paramsConfig)
@@ -149,8 +151,11 @@ func (a android) build(params Params) (ImageDetails, error) {
 	if err != nil {
 		return details, fmt.Errorf("failed to read kernel config: %v", err)
 	}
+	log.Logf(0, "LIZ_TESTING: kernelConfig: %v", kernelConfig)
+	log.Logf(0, "LIZ_TESTING: modulesConfig: %v", modulesConfig)
 
 	commonKernelDir := filepath.Join(params.KernelDir, "common")
+	log.Logf(0, "LIZ_TESTING: commonKernelDir: %v", commonKernelDir)
 
 	// Add prebuilts to path
 	prebuilts := fmt.Sprintf("PATH=$PATH:%v/prebuilts/kernel-build-tools/linux-x86/bin/", params.KernelDir)
@@ -240,6 +245,9 @@ func (a android) runCmd(cmdStr string, dir string, args []string) error {
 		return err
 	}
 	cmd.Dir = dir
+	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
+	log.Logf(0, "LIZ_TESTING: dir: %v", cmd.Dir)
+
 	cmd.Env = append([]string{}, os.Environ()...)
 	// This makes the build [more] deterministic:
 	// 2 builds from the same sources should result in the same vmlinux binary.
