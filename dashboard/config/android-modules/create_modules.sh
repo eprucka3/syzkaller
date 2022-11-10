@@ -1,13 +1,5 @@
 #/bin/bash
 
-# LIZ TODO: Pass these in/set these from build file
-ROOT=/syzkaller/managers/ci2-cuttlefish-5-10/kernel-build-test
-DIST_DIR=${ROOT}/common
-MODULES_STAGING_DIR=${DIST_DIR}/staging
-
-# Add prebuilts to path
-export PATH=$PATH:/syzkaller/managers/ci2-cuttlefish-5-10/kernel-build-test/prebuilts/kernel-build-tools/linux-x86/bin/
-
 # $1 MODULES_STAGING_DIR    <The directory to look for all the compiled modules>
 # $2 IMAGE_STAGING_DIR  <The destination directory in which MODULES_LIST is
 #                        expected, and it's corresponding modules.* files>
@@ -51,28 +43,45 @@ function run_depmod() {
   )
 }
 
+# $1 OUT_DIR; output directory
 function create_initramfs() {
-  create_modules_staging ${MODULES_STAGING_DIR} ${MODULES_STAGING_DIR}/initramfs_staging
+  local out_dir=$1
+  local modules_staging_dir=${out_dir}/staging
+  create_modules_staging ${modules_staging_dir} ${modules_staging_dir}/initramfs_staging
 
-  local modules_root_dir=$(echo ${MODULES_STAGING_DIR}/initramfs_staging/lib/modules/*)
+  local modules_root_dir=$(echo ${modules_staging_dir}/initramfs_staging/lib/modules/*)
 
-  cp ${modules_root_dir}/modules.load ${DIST_DIR}/modules.load
-  cp ${modules_root_dir}/modules.load ${DIST_DIR}/vendor_boot.modules.load
+  cp ${modules_root_dir}/modules.load ${out_dir}/modules.load
+  cp ${modules_root_dir}/modules.load ${out_dir}/vendor_boot.modules.load
 
-  mkbootfs ${MODULES_STAGING_DIR}/initramfs_staging >${MODULES_STAGING_DIR}/initramfs.cpio
-  lz4 -c -l -12 --favor-decSpeed ${MODULES_STAGING_DIR}/initramfs.cpio >${DIST_DIR}/initramfs.img
+  mkbootfs ${modules_staging_dir}/initramfs_staging >${modules_staging_dir}/initramfs.cpio
+  lz4 -c -l -12 --favor-decSpeed ${modules_staging_dir}/initramfs.cpio >${out_dir}/initramfs.img
 }
 
+# $1 OUT_DIR; output directory
+# $2 COMMON_KERNEL_DIR; kernel/common directory
 function zip_kernel_headers() {
-  KERNEL_HEADERS_TAR=${DIST_DIR}/kernel-headers.tar.gz
+  local out_dir=$1
+  local kernel_common_dir=$2
+  KERNEL_HEADERS_TAR=${out_dir}/kernel-headers.tar.gz
   echo " Copying kernel headers to ${KERNEL_HEADERS_TAR}"
-  pushd $ROOT_DIR/$KERNEL_DIR
-    find arch include $OUT_DIR -name *.h -print0               \
+  pushd $kernel_common_dir
+    find arch include $out_dir -name *.h -print0               \
             | tar -czf $KERNEL_HEADERS_TAR                     \
               --absolute-names                                 \
               --dereference                                    \
-              --transform "s,.*$OUT_DIR,,"                     \
+              --transform "s,.*$out_dir,,"                     \
               --transform "s,^,kernel-headers/,"               \
               --null -T -
   popd
 }
+
+# Call specified input function
+if declare -f "$1" > /dev/null
+then
+  # Pass arguments to function
+  "$@"
+else
+  echo "'$1' is not a valid function" >&2
+  exit 1
+fi
