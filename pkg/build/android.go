@@ -11,6 +11,7 @@ import (
 	"io/ioutil"
 	"os"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/google/syzkaller/pkg/log"
@@ -68,9 +69,14 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 	if err := a.writeFile(configFile, configPath); err != nil {
 		return fmt.Errorf("failed to write config file: %v", err)
 	}
+	// if err := a.runMake(commonKernelDir, params, "mrproper"); err != nil {
+	// 	return err
+	// }
+	// log.Logf(0, "LIZ_TESTING: SLEEP")
+	// time.Sleep(time.Hour * 8)
 	// One would expect olddefconfig here, but olddefconfig is not present in v3.6 and below.
 	// oldconfig is the same as olddefconfig if stdin is not set.
-	if err := a.runMakeCmd(commonKernelDir, params, "oldconfig"); err != nil {
+	if err := a.runMake(commonKernelDir, params, "oldconfig"); err != nil {
 		return err
 	}
 	// Write updated kernel config early, so that it's captured on build failures.
@@ -96,37 +102,42 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 			return err
 		}
 	}
-	// Include prebuilts
-	prebuilts := fmt.Sprintf("-I %v/prebuilts/kernel-build-tools/linux-x86/bin/", params.KernelDir)
-	if err := a.runMakeCmd(commonKernelDir, params, prebuilts, "bzImage", "modules", "prepare-objtool"); err != nil {
+	// if err := a.runMake(commonKernelDir, params, "bzImage"); err != nil {
+	// 	return err
+	// }
+	// log.Logf(0, "LIZ_TESTING: After make")
+	// log.Logf(0, "LIZ_TESTING: SLEEP")
+	// time.Sleep(time.Hour * 8)
+	if err := a.runMake(commonKernelDir, params, "bzImage", "modules", "prepare-objtool"); err != nil {
 		return err
 	}
 
 	moduleStagingDir := filepath.Join(commonKernelDir, "staging")
 	moduleInstallFlag := fmt.Sprintf("INSTALL_MOD_PATH=%v", moduleStagingDir)
-	if err := a.runMakeCmd(commonKernelDir, params, moduleInstallFlag, prebuilts, "modules_install"); err != nil {
+	if err := a.runMake(commonKernelDir, params, moduleInstallFlag, "modules_install"); err != nil {
 		return err
 	}
 	return nil
 }
 
 func (a android) buildExtModules(extModulePath string, params Params) error {
-	// Location of external modules relative to the kernel source
-	cFlag := fmt.Sprintf("-C %v", extModulePath)
+	commonKernelDir := filepath.Join(params.KernelDir, "common")
+
 	// Location of external modules relative to common kernel dir
 	mFlag := fmt.Sprintf("M=../%v", extModulePath)
 	// Absolute location of the kernel source directory
-	srcFlag := fmt.Sprintf("KERNEL_SRC=%v", params.KernelDir)
-	// Include prebuilts
-	prebuilts := fmt.Sprintf("-I %v/prebuilts/kernel-build-tools/linux-x86/bin/", params.KernelDir)
+	srcFlag := fmt.Sprintf("KERNEL_SRC=%v", commonKernelDir)
+
+	moduleStagingDir := filepath.Join(commonKernelDir, "staging")
+	moduleInstallFlag := fmt.Sprintf("INSTALL_MOD_PATH=%v", moduleStagingDir)
 
 	// Make external modules
-	if err := a.runMakeCmd(params.KernelDir, params, cFlag, mFlag, srcFlag, prebuilts); err != nil {
+	if err := a.runMake(params.KernelDir, params, "-C", extModulePath, mFlag, srcFlag, moduleInstallFlag); err != nil {
 		return err
 	}
 
 	// Install modules
-	if err := a.runMakeCmd(params.KernelDir, params, cFlag, mFlag, srcFlag, prebuilts, "modules_install"); err != nil {
+	if err := a.runMake(params.KernelDir, params, "-C", extModulePath, mFlag, srcFlag, moduleInstallFlag, "modules_install"); err != nil {
 		return err
 	}
 
@@ -152,36 +163,34 @@ func (a android) build(params Params) (ImageDetails, error) {
 
 	log.Logf(0, "LIZ_TESTING: kernelConfig: %v", paramsConfig.KernelConfig)
 	log.Logf(0, "LIZ_TESTING: modulesConfig: %v", paramsConfig.ModulesConfig)
-	var kernelConfig, modulesConfig []byte
-	kernelConfig, err = ioutil.ReadFile(paramsConfig.KernelConfig)
-	if err != nil {
-		return details, fmt.Errorf("failed to read kernel config: %v", err)
-	}
-	modulesConfig, err = ioutil.ReadFile(paramsConfig.ModulesConfig)
-	if err != nil {
-		return details, fmt.Errorf("failed to read modules config: %v", err)
-	}
+	// var kernelConfig, modulesConfig []byte
+	// kernelConfig, err = ioutil.ReadFile(paramsConfig.KernelConfig)
+	// if err != nil {
+	// 	return details, fmt.Errorf("failed to read kernel config: %v", err)
+	// }
+	// modulesConfig, err = ioutil.ReadFile(paramsConfig.ModulesConfig)
+	// if err != nil {
+	// 	return details, fmt.Errorf("failed to read modules config: %v", err)
+	// }
 
 	commonKernelDir := filepath.Join(params.KernelDir, "common")
-	log.Logf(0, "LIZ_TESTING: commonKernelDir: %v", commonKernelDir)
+	// log.Logf(0, "LIZ_TESTING: commonKernelDir: %v", commonKernelDir)
 
 	// Build common kernel
-	if err := a.buildKernel(kernelConfig, params); err != nil {
-		return details, fmt.Errorf("failed to build android common kernel: %v", err)
-	}
-	commonConfig := filepath.Join(commonKernelDir, "kernel.config")
-	if err := osutil.CopyFile(commonConfig, filepath.Join(params.OutputDir, "common-kernel.config")); err != nil {
-		return details, fmt.Errorf("failed to copy kernel config file: %v", err)
-	}
+	// if err := a.buildKernel(kernelConfig, params); err != nil {
+	// 	return details, fmt.Errorf("failed to build android common kernel: %v", err)
+	// }
+	// if err := osutil.CopyFile(filepath.Join(params.OutputDir, "kernel.config"), filepath.Join(params.OutputDir, "common-kernel.config")); err != nil {
+	// 	return details, fmt.Errorf("failed to copy kernel config file: %v", err)
+	// }
 
 	// Build modules
-	if err := a.buildKernel(modulesConfig, params); err != nil {
-		return details, fmt.Errorf("failed to build android common modules: %v", err)
-	}
-	moduleConfig := filepath.Join(commonKernelDir, "kernel.config")
-	if err := osutil.CopyFile(moduleConfig, filepath.Join(params.OutputDir, "modules.config")); err != nil {
-		return details, fmt.Errorf("failed to copy modules config file: %v", err)
-	}
+	// if err := a.buildKernel(modulesConfig, params); err != nil {
+	// 	return details, fmt.Errorf("failed to build android common modules: %v", err)
+	// }
+	// if err := osutil.CopyFile(filepath.Join(params.OutputDir, "kernel.config"), filepath.Join(params.OutputDir, "modules.config")); err != nil {
+	// 	return details, fmt.Errorf("failed to copy modules config file: %v", err)
+	// }
 
 	// Build external modules
 	if err := a.buildExtModules(paramsConfig.ExtModules, params); err != nil {
@@ -241,16 +250,32 @@ func (a android) build(params Params) (ImageDetails, error) {
 	return details, nil
 }
 
-func (a android) runCmd(cmdStr string, dir string, args []string) error {
-	cmd := osutil.Command(cmdStr, args...)
+func (a android) runMakeImpl(runDir, arch, compiler, linker, ccache, kernelDir string, extraArgs []string) error {
+	target := targets.Get(targets.Linux, arch)
+	args := LinuxMakeArgs(target, compiler, linker, ccache, "")
+	args = append(args, extraArgs...)
+	cmd := osutil.Command("make", args...)
 	if err := osutil.Sandbox(cmd, true, true); err != nil {
 		return err
 	}
-	cmd.Dir = dir
-	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
+	cmd.Dir = runDir
 	log.Logf(0, "LIZ_TESTING: dir: %v", cmd.Dir)
+	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
+	// Add prebuilts to path
+	prebuilts := filepath.Join(kernelDir, "prebuilts/kernel-build-tools/linux-x86/bin/")
+	env := os.Environ()
+	for idx, envVar := range env {
+		if strings.HasPrefix(envVar, "PATH=") {
+			env[idx] = fmt.Sprintf("%v:%v", envVar, prebuilts)
+		}
+	}
+	log.Logf(0, "LIZ_TESTING: env: %v", env)
 
-	cmd.Env = append([]string{}, os.Environ()...)
+	cmd.Env = append([]string{}, env...)
+	// cmd.Env = append([]string{}, os.Environ()...)
+	// log.Logf(0, "LIZ_TESTING: env: %v", cmd.Env)
+	// log.Logf(0, "LIZ_TESTING: SLEEP")
+	// time.Sleep(time.Hour * 8)
 	// This makes the build [more] deterministic:
 	// 2 builds from the same sources should result in the same vmlinux binary.
 	// Build on a release commit and on the previous one should result in the same vmlinux too.
@@ -267,12 +292,10 @@ func (a android) runCmd(cmdStr string, dir string, args []string) error {
 	return err
 }
 
-func (a android) runMakeCmd(dir string, params Params, extraArgs ...string) error {
-	target := targets.Get(targets.Linux, params.TargetArch)
-	commonKernelDir := filepath.Join(params.KernelDir, "common")
-	args := LinuxMakeArgs(target, params.Compiler, params.Linker, params.Ccache, commonKernelDir)
-	args = append(args, extraArgs...)
-	return a.runCmd("make", dir, args)
+func (a android) runMake(dir string, params Params, extraArgs ...string) error {
+	// LIZ TODO: Not sure why target isn't working
+	// extraArgs = append([]string{"CROSS_COMPILE=x86_64-linux-gnu-", "CC=clang", "LD=ld.lld"}, extraArgs...)
+	return a.runMakeImpl(dir, params.TargetArch, params.Compiler, params.Linker, params.Ccache, params.KernelDir, extraArgs)
 }
 
 func (a android) writeFile(file string, data []byte) error {
@@ -283,8 +306,5 @@ func (a android) writeFile(file string, data []byte) error {
 }
 
 func (a android) clean(kernelDir, targetArch string) error {
-	target := targets.Get(targets.Linux, targetArch)
-	args := LinuxMakeArgs(target, "", "", "", kernelDir)
-	args = append(args, "distclean")
-	return a.runCmd("make", kernelDir, args)
+	return runMakeImpl(targetArch, "", "", "", kernelDir, []string{"distclean"})
 }

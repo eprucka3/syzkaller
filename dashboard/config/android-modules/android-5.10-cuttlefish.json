@@ -1,5 +1,5 @@
 {
-	"kernelConfig": "config/android-modules/android-5.10.config",
+	"kernelConfig": "config/linux/android-5.10.config",
 	"modulesConfig": "config/android-modules/android-5.10-virtual-device.config",
 	"extModules": "common-modules/virtual-device",
 	"modulesScript": "config/android-modules/create-modules.sh"
