@@ -1,6 +1,6 @@
 {
-	"kernel_config": "config/android-modules/android-5.10.config",
-	"modules_config": "config/android-modules/android-5.10-virtual-device.config",
-	"ext_modules": "common-modules/virtual-device",
-	"modules_script": "config/android-modules/create-modules.sh"
+	"kernelConfig": "config/android-modules/android-5.10.config",
+	"modulesConfig": "config/android-modules/android-5.10-virtual-device.config",
+	"extModules": "common-modules/virtual-device",
+	"modulesScript": "config/android-modules/create-modules.sh"
 }

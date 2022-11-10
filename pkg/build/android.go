@@ -18,12 +18,12 @@ import (
 	"github.com/google/syzkaller/sys/targets"
 )
 
-// ParamsConfig struct which contains external module and build config paths.
+// ParamsConfig defines external module and build config paths from the input params.Config file.
 type ParamsConfig struct {
-	kernelConfig  string
-	modulesConfig string
-	extModules    string
-	modulesScript string
+	KernelConfig  string
+	ModulesConfig string
+	ExtModules    string
+	ModulesScript string
 }
 
 type android struct{}
@@ -96,13 +96,15 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 			return err
 		}
 	}
-	if err := a.runMakeCmd(commonKernelDir, params, "bzImage", "modules", "prepare-objtool"); err != nil {
+	// Include prebuilts
+	prebuilts := fmt.Sprintf("-I %v/prebuilts/kernel-build-tools/linux-x86/bin/", params.KernelDir)
+	if err := a.runMakeCmd(commonKernelDir, params, prebuilts, "bzImage", "modules", "prepare-objtool"); err != nil {
 		return err
 	}
 
 	moduleStagingDir := filepath.Join(commonKernelDir, "staging")
 	moduleInstallFlag := fmt.Sprintf("INSTALL_MOD_PATH=%v", moduleStagingDir)
-	if err := a.runMakeCmd(commonKernelDir, params, moduleInstallFlag, "modules_install"); err != nil {
+	if err := a.runMakeCmd(commonKernelDir, params, moduleInstallFlag, prebuilts, "modules_install"); err != nil {
 		return err
 	}
 	return nil
@@ -110,17 +112,21 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 
 func (a android) buildExtModules(extModulePath string, params Params) error {
 	// Location of external modules relative to the kernel source
-	flagC := fmt.Sprintf("-C %v", extModulePath)
+	cFlag := fmt.Sprintf("-C %v", extModulePath)
 	// Location of external modules relative to common kernel dir
-	flagM := fmt.Sprintf("M=../%v", extModulePath)
+	mFlag := fmt.Sprintf("M=../%v", extModulePath)
 	// Absolute location of the kernel source directory
-	flagSrc := fmt.Sprintf("KERNEL_SRC=%v", params.KernelDir)
-	if err := a.runMakeCmd(params.KernelDir, params, flagC, flagM, flagSrc); err != nil {
+	srcFlag := fmt.Sprintf("KERNEL_SRC=%v", params.KernelDir)
+	// Include prebuilts
+	prebuilts := fmt.Sprintf("-I %v/prebuilts/kernel-build-tools/linux-x86/bin/", params.KernelDir)
+
+	// Make external modules
+	if err := a.runMakeCmd(params.KernelDir, params, cFlag, mFlag, srcFlag, prebuilts); err != nil {
 		return err
 	}
 
 	// Install modules
-	if err := a.runMakeCmd(params.KernelDir, params, flagC, flagM, flagSrc, "modules_install"); err != nil {
+	if err := a.runMakeCmd(params.KernelDir, params, cFlag, mFlag, srcFlag, prebuilts, "modules_install"); err != nil {
 		return err
 	}
 
@@ -129,6 +135,7 @@ func (a android) buildExtModules(extModulePath string, params Params) error {
 
 func (a android) build(params Params) (ImageDetails, error) {
 	var details ImageDetails
+	var err error
 
 	if params.CmdlineFile != "" {
 		return details, fmt.Errorf("cmdline file is not supported for android cuttlefish images")
@@ -137,31 +144,26 @@ func (a android) build(params Params) (ImageDetails, error) {
 		return details, fmt.Errorf("sysctl file is not supported for android cuttlefish images")
 	}
 
-	log.Logf(0, "LIZ_TESTING: Config: %v", params.Config)
 	// Parse input config
 	var paramsConfig ParamsConfig
-	json.Unmarshal(params.Config, &paramsConfig)
+	if err = json.Unmarshal(params.Config, &paramsConfig); err != nil {
+		return details, fmt.Errorf("failed to unmarshal kernel config json: %v", err)
+	}
+
+	log.Logf(0, "LIZ_TESTING: kernelConfig: %v", paramsConfig.KernelConfig)
+	log.Logf(0, "LIZ_TESTING: modulesConfig: %v", paramsConfig.ModulesConfig)
 	var kernelConfig, modulesConfig []byte
-	var err error
-	kernelConfig, err = ioutil.ReadFile(paramsConfig.kernelConfig)
+	kernelConfig, err = ioutil.ReadFile(paramsConfig.KernelConfig)
 	if err != nil {
 		return details, fmt.Errorf("failed to read kernel config: %v", err)
 	}
-	modulesConfig, err = ioutil.ReadFile(paramsConfig.kernelConfig)
+	modulesConfig, err = ioutil.ReadFile(paramsConfig.ModulesConfig)
 	if err != nil {
-		return details, fmt.Errorf("failed to read kernel config: %v", err)
+		return details, fmt.Errorf("failed to read modules config: %v", err)
 	}
-	log.Logf(0, "LIZ_TESTING: kernelConfig: %v", kernelConfig)
-	log.Logf(0, "LIZ_TESTING: modulesConfig: %v", modulesConfig)
 
 	commonKernelDir := filepath.Join(params.KernelDir, "common")
 	log.Logf(0, "LIZ_TESTING: commonKernelDir: %v", commonKernelDir)
-
-	// Add prebuilts to path
-	prebuilts := fmt.Sprintf("PATH=$PATH:%v/prebuilts/kernel-build-tools/linux-x86/bin/", params.KernelDir)
-	if _, err := osutil.RunCmd(time.Second, "", "export", prebuilts); err != nil {
-		return details, fmt.Errorf("failed to add prebuilts to path: %v", err)
-	}
 
 	// Build common kernel
 	if err := a.buildKernel(kernelConfig, params); err != nil {
@@ -182,12 +184,12 @@ func (a android) build(params Params) (ImageDetails, error) {
 	}
 
 	// Build external modules
-	if err := a.buildExtModules(paramsConfig.extModules, params); err != nil {
+	if err := a.buildExtModules(paramsConfig.ExtModules, params); err != nil {
 		return details, fmt.Errorf("failed to build external modules: %v", err)
 	}
 
 	// Zip kernel headers
-	execModuleScript := fmt.Sprintf("./%v", paramsConfig.modulesScript)
+	execModuleScript := fmt.Sprintf("./%v", paramsConfig.ModulesScript)
 	if _, err := osutil.RunCmd(time.Hour, "", execModuleScript, "zip_kernel_headers", commonKernelDir, "common"); err != nil {
 		return details, fmt.Errorf("failed to zip kernel headers: %v", err)
 	}
