@@ -10,6 +10,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"time"
@@ -69,11 +70,7 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 	if err := a.writeFile(configFile, configPath); err != nil {
 		return fmt.Errorf("failed to write config file: %v", err)
 	}
-	// if err := a.runMake(commonKernelDir, params, "mrproper"); err != nil {
-	// 	return err
-	// }
-	// log.Logf(0, "LIZ_TESTING: SLEEP")
-	// time.Sleep(time.Hour * 8)
+
 	// One would expect olddefconfig here, but olddefconfig is not present in v3.6 and below.
 	// oldconfig is the same as olddefconfig if stdin is not set.
 	if err := a.runMake(commonKernelDir, params, "oldconfig"); err != nil {
@@ -102,12 +99,7 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 			return err
 		}
 	}
-	// if err := a.runMake(commonKernelDir, params, "bzImage"); err != nil {
-	// 	return err
-	// }
-	// log.Logf(0, "LIZ_TESTING: After make")
-	// log.Logf(0, "LIZ_TESTING: SLEEP")
-	// time.Sleep(time.Hour * 8)
+
 	if err := a.runMake(commonKernelDir, params, "bzImage", "modules", "prepare-objtool"); err != nil {
 		return err
 	}
@@ -154,6 +146,7 @@ func (a android) build(params Params) (ImageDetails, error) {
 	if params.SysctlFile != "" {
 		return details, fmt.Errorf("sysctl file is not supported for android cuttlefish images")
 	}
+	commonKernelDir := filepath.Join(params.KernelDir, "common")
 
 	// Parse input config
 	var paramsConfig ParamsConfig
@@ -161,50 +154,53 @@ func (a android) build(params Params) (ImageDetails, error) {
 		return details, fmt.Errorf("failed to unmarshal kernel config json: %v", err)
 	}
 
-	log.Logf(0, "LIZ_TESTING: kernelConfig: %v", paramsConfig.KernelConfig)
-	log.Logf(0, "LIZ_TESTING: modulesConfig: %v", paramsConfig.ModulesConfig)
-	// var kernelConfig, modulesConfig []byte
-	// kernelConfig, err = ioutil.ReadFile(paramsConfig.KernelConfig)
-	// if err != nil {
-	// 	return details, fmt.Errorf("failed to read kernel config: %v", err)
-	// }
-	// modulesConfig, err = ioutil.ReadFile(paramsConfig.ModulesConfig)
-	// if err != nil {
-	// 	return details, fmt.Errorf("failed to read modules config: %v", err)
-	// }
-
-	commonKernelDir := filepath.Join(params.KernelDir, "common")
-	// log.Logf(0, "LIZ_TESTING: commonKernelDir: %v", commonKernelDir)
+	var kernelConfig, modulesConfig []byte
+	kernelConfig, err = ioutil.ReadFile(paramsConfig.KernelConfig)
+	if err != nil {
+		return details, fmt.Errorf("failed to read kernel config: %v", err)
+	}
+	modulesConfig, err = ioutil.ReadFile(paramsConfig.ModulesConfig)
+	if err != nil {
+		return details, fmt.Errorf("failed to read modules config: %v", err)
+	}
 
 	// Build common kernel
-	// if err := a.buildKernel(kernelConfig, params); err != nil {
-	// 	return details, fmt.Errorf("failed to build android common kernel: %v", err)
-	// }
-	// if err := osutil.CopyFile(filepath.Join(params.OutputDir, "kernel.config"), filepath.Join(params.OutputDir, "common-kernel.config")); err != nil {
-	// 	return details, fmt.Errorf("failed to copy kernel config file: %v", err)
-	// }
+	if err := a.buildKernel(kernelConfig, params); err != nil {
+		return details, fmt.Errorf("failed to build android common kernel: %v", err)
+	}
+	if err := osutil.CopyFile(filepath.Join(params.OutputDir, "kernel.config"), filepath.Join(params.OutputDir, "common-kernel.config")); err != nil {
+		return details, fmt.Errorf("failed to copy kernel config file: %v", err)
+	}
 
 	// Build modules
-	// if err := a.buildKernel(modulesConfig, params); err != nil {
-	// 	return details, fmt.Errorf("failed to build android common modules: %v", err)
-	// }
-	// if err := osutil.CopyFile(filepath.Join(params.OutputDir, "kernel.config"), filepath.Join(params.OutputDir, "modules.config")); err != nil {
-	// 	return details, fmt.Errorf("failed to copy modules config file: %v", err)
-	// }
+	if err := a.buildKernel(modulesConfig, params); err != nil {
+		return details, fmt.Errorf("failed to build android common modules: %v", err)
+	}
+	if err := osutil.CopyFile(filepath.Join(params.OutputDir, "kernel.config"), filepath.Join(params.OutputDir, "modules.config")); err != nil {
+		return details, fmt.Errorf("failed to copy modules config file: %v", err)
+	}
 
 	// Build external modules
 	if err := a.buildExtModules(paramsConfig.ExtModules, params); err != nil {
 		return details, fmt.Errorf("failed to build external modules: %v", err)
 	}
 
+	// Copy module functions to commonKernelDir
+	modulesScript := filepath.Base(paramsConfig.ModulesScript)
+	if err := osutil.CopyFile(paramsConfig.ModulesScript, filepath.Join(commonKernelDir, modulesScript)); err != nil {
+		return details, fmt.Errorf("failed to copy module functions: %v", err)
+	}
+
 	// Zip kernel headers
-	execModuleScript := fmt.Sprintf("./%v", paramsConfig.ModulesScript)
-	if _, err := osutil.RunCmd(time.Hour, "", execModuleScript, "zip_kernel_headers", commonKernelDir, "common"); err != nil {
+	execModulesScript := fmt.Sprintf("./%v", modulesScript)
+	cmd := osutil.Command(execModulesScript, "zip_kernel_headers", commonKernelDir)
+	if err := a.runCmd(cmd, commonKernelDir, params.KernelDir); err != nil {
 		return details, fmt.Errorf("failed to zip kernel headers: %v", err)
 	}
 
 	// Create initramfs image
-	if _, err := osutil.RunCmd(time.Hour, "", execModuleScript, "create_initramfs", commonKernelDir); err != nil {
+	cmd = osutil.Command(execModulesScript, "create_initramfs", commonKernelDir)
+	if err := a.runCmd(cmd, commonKernelDir, params.KernelDir); err != nil {
 		return details, fmt.Errorf("failed to create initramfs image: %v", err)
 	}
 
@@ -258,28 +254,29 @@ func (a android) runMakeImpl(runDir, arch, compiler, linker, ccache, kernelDir s
 	if err := osutil.Sandbox(cmd, true, true); err != nil {
 		return err
 	}
-	cmd.Dir = runDir
-	log.Logf(0, "LIZ_TESTING: dir: %v", cmd.Dir)
-	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
+	return a.runCmd(cmd, runDir, kernelDir)
+}
+
+func (a android) runCmd(cmd *exec.Cmd, runDir string, kernelDir string) error {
 	// Add prebuilts to path
-	prebuilts := filepath.Join(kernelDir, "prebuilts/kernel-build-tools/linux-x86/bin/")
+	// Prebuilts taken from build_setup_env.sh and pre-appended to path
+	prebuiltsPath := filepath.Join(kernelDir, "prebuilts/kernel-build-tools/linux-x86/bin/")
 	env := os.Environ()
 	for idx, envVar := range env {
 		if strings.HasPrefix(envVar, "PATH=") {
-			env[idx] = fmt.Sprintf("%v:%v", envVar, prebuilts)
+			curPath := os.Getenv("PATH")
+			env[idx] = fmt.Sprintf("PATH=%v:%v", prebuiltsPath, curPath)
 		}
 	}
 	log.Logf(0, "LIZ_TESTING: env: %v", env)
 
 	cmd.Env = append([]string{}, env...)
-	// cmd.Env = append([]string{}, os.Environ()...)
-	// log.Logf(0, "LIZ_TESTING: env: %v", cmd.Env)
-	// log.Logf(0, "LIZ_TESTING: SLEEP")
-	// time.Sleep(time.Hour * 8)
+
 	// This makes the build [more] deterministic:
 	// 2 builds from the same sources should result in the same vmlinux binary.
 	// Build on a release commit and on the previous one should result in the same vmlinux too.
 	// We use it for detecting no-op changes during bisection.
+	// GOLDFISH_DRIVERS from build.config.virtual_device_kasan.x86_64
 	cmd.Env = append(cmd.Env,
 		"KBUILD_BUILD_VERSION=0",
 		"KBUILD_BUILD_TIMESTAMP=now",
@@ -287,14 +284,17 @@ func (a android) runMakeImpl(runDir, arch, compiler, linker, ccache, kernelDir s
 		"KBUILD_BUILD_HOST=syzkaller",
 		"KERNELVERSION=syzkaller",
 		"LOCALVERSION=-syzkaller",
+		"BUILD_GOLDFISH_DRIVERS=m",
 	)
-	_, err := osutil.Run(time.Hour, cmd)
+	cmd.Dir = runDir
+	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
+	log.Logf(0, "LIZ_TESTING: dir: %v", cmd.Dir)
+	out, err := osutil.Run(time.Hour, cmd)
+	log.Logf(0, "LIZ_TESTING: %v", string(out))
 	return err
 }
 
 func (a android) runMake(dir string, params Params, extraArgs ...string) error {
-	// LIZ TODO: Not sure why target isn't working
-	// extraArgs = append([]string{"CROSS_COMPILE=x86_64-linux-gnu-", "CC=clang", "LD=ld.lld"}, extraArgs...)
 	return a.runMakeImpl(dir, params.TargetArch, params.Compiler, params.Linker, params.Ccache, params.KernelDir, extraArgs)
 }
 

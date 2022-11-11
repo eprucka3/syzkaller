@@ -1,13 +1,15 @@
-#/bin/bash
+#!/bin/bash
 
 # $1 MODULES_STAGING_DIR    <The directory to look for all the compiled modules>
 # $2 IMAGE_STAGING_DIR  <The destination directory in which MODULES_LIST is
+# $3 OUT_DIR; output directory
 #                        expected, and it's corresponding modules.* files>
 function create_modules_staging() {
   local src_dir=$(echo $1/lib/modules/*)
   local version=$(basename "${src_dir}")
   local dest_dir=$2/lib/modules/${version}
   local dest_stage=$2
+  local out_dir=$3
 
   rm -rf ${dest_dir}
   mkdir -p ${dest_dir}/kernel
@@ -19,19 +21,20 @@ function create_modules_staging() {
 
   # Re-run depmod to detect any dependencies between in-kernel and externel
   # modules. The, create modules.order based on all the modules compiled.
-  run_depmod ${dest_stage} "" "${version}"
+  run_depmod ${dest_stage} "${version}" ${out_dir}
   cp ${dest_dir}/modules.order ${dest_dir}/modules.load
 }
 
 # $1 directory of kernel modules ($1/lib/modules/x.y)
 # $2 kernel version
+# $3 OUT_DIR; output directory
 function run_depmod() {
   (
     local ramdisk_dir=$1
     local DEPMOD_OUTPUT
 
     cd ${ramdisk_dir}
-    if ! DEPMOD_OUTPUT="$(depmod $2 -F ${DIST_DIR}/System.map -b . $3 2>&1)"; then
+    if ! DEPMOD_OUTPUT="$(depmod -F $3/System.map -b . $2 2>&1)"; then
       echo "$DEPMOD_OUTPUT" >&2
       exit 1
     fi
@@ -47,7 +50,7 @@ function run_depmod() {
 function create_initramfs() {
   local out_dir=$1
   local modules_staging_dir=${out_dir}/staging
-  create_modules_staging ${modules_staging_dir} ${modules_staging_dir}/initramfs_staging
+  create_modules_staging ${modules_staging_dir} ${modules_staging_dir}/initramfs_staging ${out_dir}
 
   local modules_root_dir=$(echo ${modules_staging_dir}/initramfs_staging/lib/modules/*)
 
@@ -58,19 +61,17 @@ function create_initramfs() {
   lz4 -c -l -12 --favor-decSpeed ${modules_staging_dir}/initramfs.cpio >${out_dir}/initramfs.img
 }
 
-# $1 OUT_DIR; output directory
-# $2 COMMON_KERNEL_DIR; kernel/common directory
+# $1 Kernel common dir
 function zip_kernel_headers() {
-  local out_dir=$1
-  local kernel_common_dir=$2
-  KERNEL_HEADERS_TAR=${out_dir}/kernel-headers.tar.gz
+  local kernel_common_dir=$1
+  KERNEL_HEADERS_TAR=${kernel_common_dir}/kernel-headers.tar.gz
   echo " Copying kernel headers to ${KERNEL_HEADERS_TAR}"
   pushd $kernel_common_dir
     find arch include $out_dir -name *.h -print0               \
             | tar -czf $KERNEL_HEADERS_TAR                     \
               --absolute-names                                 \
               --dereference                                    \
-              --transform "s,.*$out_dir,,"                     \
+              --transform "s,.*$kernel_common_dir,,"                     \
               --transform "s,^,kernel-headers/,"               \
               --null -T -
   popd
