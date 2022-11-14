@@ -39,7 +39,7 @@ import (
 // during that period (or around that period), we can rebuild kernel, restart
 // manager and then instantly shutdown everything for syzkaller update.
 // Instead we rebuild syzkaller, restart and then rebuild kernel.
-const kernelRebuildPeriod = syzkallerRebuildPeriod + time.Hour
+const kernelRebuildPeriod = 0
 
 // List of required files in kernel build (contents of latest/current dirs).
 var imageFiles = map[string]bool{
@@ -279,11 +279,12 @@ func loadBuildInfo(dir string) (*BuildInfo, error) {
 // checkLatest checks if we have a good working latest build and returns its build info.
 // If the build is missing/broken, nil is returned.
 func (mgr *Manager) checkLatest() *BuildInfo {
-	if !osutil.FilesExist(mgr.latestDir, imageFiles) {
-		return nil
-	}
-	info, _ := loadBuildInfo(mgr.latestDir)
-	return info
+	// if !osutil.FilesExist(mgr.latestDir, imageFiles) {
+	// 	return nil
+	// }
+	// info, _ := loadBuildInfo(mgr.latestDir)
+	// return info
+	return nil
 }
 
 func (mgr *Manager) createBuildInfo(kernelCommit *vcs.Commit, compilerID string) *BuildInfo {

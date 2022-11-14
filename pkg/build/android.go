@@ -15,16 +15,23 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/sys/targets"
 )
 
 // ParamsConfig defines external module and build config paths from the input params.Config file.
 type ParamsConfig struct {
-	KernelConfig  string
+	// Path to android common kernel config
+	KernelConfig string
+	// Path to modules kernel config
 	ModulesConfig string
-	ExtModules    string
+	// Relative path within kernel to external modules
+	ExtModules string
+	// Path to script with create_initramfs and zip_kernel_headers functions
 	ModulesScript string
+	// Additional environment variables necessary to build modules
+	ModulesEnvVars []string
 }
 
 type android struct{}
@@ -72,9 +79,15 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 
 	// One would expect olddefconfig here, but olddefconfig is not present in v3.6 and below.
 	// oldconfig is the same as olddefconfig if stdin is not set.
-	if err := a.runMake(commonKernelDir, params, "oldconfig"); err != nil {
-		return err
+	cmd, err := a.createMakeCmd(params, "oldconfig")
+	if err != nil {
+		return fmt.Errorf("failed to create command to make oldconfig: %v", err)
 	}
+	cmd.Dir = commonKernelDir
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
+		return fmt.Errorf("failed to make oldconfig: %v", err)
+	}
+
 	// Write updated kernel config early, so that it's captured on build failures.
 	outputConfig := filepath.Join(params.OutputDir, "kernel.config")
 	if err := osutil.CopyFile(configFile, outputConfig); err != nil {
@@ -99,23 +112,33 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 		}
 	}
 
-	if err := a.runMake(commonKernelDir, params, "bzImage", "modules", "prepare-objtool"); err != nil {
-		return err
+	cmd, err = a.createMakeCmd(params, "bzImage", "modules", "prepare-objtool")
+	if err != nil {
+		return fmt.Errorf("failed to create command to make bzImage: %v", err)
+	}
+	cmd.Dir = commonKernelDir
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
+		return fmt.Errorf("failed to make bzImage: %v", err)
 	}
 
 	moduleStagingDir := filepath.Join(commonKernelDir, "staging")
 	moduleInstallFlag := fmt.Sprintf("INSTALL_MOD_PATH=%v", moduleStagingDir)
-	if err := a.runMake(commonKernelDir, params, moduleInstallFlag, "modules_install"); err != nil {
-		return err
+	cmd, err = a.createMakeCmd(params, "bzImage", moduleInstallFlag, "modules_install")
+	if err != nil {
+		return fmt.Errorf("failed to create command to install modules: %v", err)
+	}
+	cmd.Dir = commonKernelDir
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
+		return fmt.Errorf("failed to install modules: %v", err)
 	}
 	return nil
 }
 
-func (a android) buildExtModules(extModulePath string, params Params) error {
+func (a android) buildExtModules(paramsConfig ParamsConfig, params Params) error {
 	commonKernelDir := filepath.Join(params.KernelDir, "common")
 
 	// Location of external modules relative to common kernel dir
-	mFlag := fmt.Sprintf("M=../%v", extModulePath)
+	mFlag := fmt.Sprintf("M=../%v", paramsConfig.ExtModules)
 	// Absolute location of the kernel source directory
 	srcFlag := fmt.Sprintf("KERNEL_SRC=%v", commonKernelDir)
 
@@ -123,13 +146,25 @@ func (a android) buildExtModules(extModulePath string, params Params) error {
 	moduleInstallFlag := fmt.Sprintf("INSTALL_MOD_PATH=%v", moduleStagingDir)
 
 	// Make external modules
-	if err := a.runMake(params.KernelDir, params, "-C", extModulePath, mFlag, srcFlag, moduleInstallFlag); err != nil {
-		return err
+	cmd, err := a.createMakeCmd(params, "-C", paramsConfig.ExtModules, mFlag, srcFlag, moduleInstallFlag)
+	if err != nil {
+		return fmt.Errorf("failed to create command to make external modules modules: %v", err)
+	}
+	cmd.Dir = params.KernelDir
+	cmd.Env = append([]string{}, paramsConfig.ModulesEnvVars...)
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
+		return fmt.Errorf("failed to make external modules: %v", err)
 	}
 
 	// Install modules
-	if err := a.runMake(params.KernelDir, params, "-C", extModulePath, mFlag, srcFlag, moduleInstallFlag, "modules_install"); err != nil {
-		return err
+	cmd, err = a.createMakeCmd(params, "-C", paramsConfig.ExtModules, mFlag, srcFlag, moduleInstallFlag, "modules_install")
+	if err != nil {
+		return fmt.Errorf("failed to create command to install modules: %v", err)
+	}
+	cmd.Dir = params.KernelDir
+	cmd.Env = append([]string{}, paramsConfig.ModulesEnvVars...)
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
+		return fmt.Errorf("failed to install modules: %v", err)
 	}
 
 	return nil
@@ -146,6 +181,9 @@ func (a android) build(params Params) (ImageDetails, error) {
 		return details, fmt.Errorf("sysctl file is not supported for android cuttlefish images")
 	}
 	commonKernelDir := filepath.Join(params.KernelDir, "common")
+
+	log.Logf(0, "LIZ_TESTING: SLEEP")
+	time.Sleep(time.Hour * 8)
 
 	// Parse input config
 	var paramsConfig ParamsConfig
@@ -180,20 +218,22 @@ func (a android) build(params Params) (ImageDetails, error) {
 	}
 
 	// Build external modules
-	if err := a.buildExtModules(paramsConfig.ExtModules, params); err != nil {
+	if err := a.buildExtModules(paramsConfig, params); err != nil {
 		return details, fmt.Errorf("failed to build external modules: %v", err)
 	}
 
 	// Zip kernel headers
 	execModulesScript := fmt.Sprintf("./%v", paramsConfig.ModulesScript)
 	cmd := osutil.Command(execModulesScript, "zip_kernel_headers", commonKernelDir)
-	if err := a.runCmd(cmd, commonKernelDir, params.KernelDir); err != nil {
+	cmd.Dir = commonKernelDir
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
 		return details, fmt.Errorf("failed to zip kernel headers: %v", err)
 	}
 
 	// Create initramfs image
 	cmd = osutil.Command(execModulesScript, "create_initramfs", commonKernelDir)
-	if err := a.runCmd(cmd, commonKernelDir, params.KernelDir); err != nil {
+	cmd.Dir = commonKernelDir
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
 		return details, fmt.Errorf("failed to create initramfs image: %v", err)
 	}
 
@@ -239,18 +279,18 @@ func (a android) build(params Params) (ImageDetails, error) {
 	return details, nil
 }
 
-func (a android) runMakeImpl(runDir, arch, compiler, linker, ccache, kernelDir string, extraArgs []string) error {
-	target := targets.Get(targets.Linux, arch)
-	args := LinuxMakeArgs(target, compiler, linker, ccache, "")
+func (a android) createMakeCmd(params Params, extraArgs ...string) (*exec.Cmd, error) {
+	target := targets.Get(targets.Linux, params.TargetArch)
+	args := LinuxMakeArgs(target, params.Compiler, params.Linker, params.Ccache, "")
 	args = append(args, extraArgs...)
 	cmd := osutil.Command("make", args...)
 	if err := osutil.Sandbox(cmd, true, true); err != nil {
-		return err
+		return cmd, err
 	}
-	return a.runCmd(cmd, runDir, kernelDir)
+	return cmd, nil
 }
 
-func (a android) runCmd(cmd *exec.Cmd, runDir string, kernelDir string) error {
+func (a android) runCmd(cmd *exec.Cmd, kernelDir string) error {
 	// Add prebuilts to path
 	// Prebuilts taken from build_setup_env.sh and pre-appended to path
 	prebuiltsPath := filepath.Join(kernelDir, "prebuilts/kernel-build-tools/linux-x86/bin/")
@@ -262,7 +302,7 @@ func (a android) runCmd(cmd *exec.Cmd, runDir string, kernelDir string) error {
 		}
 	}
 
-	cmd.Env = append([]string{}, env...)
+	cmd.Env = append(cmd.Env, env...)
 
 	// This makes the build [more] deterministic:
 	// 2 builds from the same sources should result in the same vmlinux binary.
@@ -276,15 +316,9 @@ func (a android) runCmd(cmd *exec.Cmd, runDir string, kernelDir string) error {
 		"KBUILD_BUILD_HOST=syzkaller",
 		"KERNELVERSION=syzkaller",
 		"LOCALVERSION=-syzkaller",
-		"BUILD_GOLDFISH_DRIVERS=m",
 	)
-	cmd.Dir = runDir
 	_, err := osutil.Run(time.Hour, cmd)
 	return err
-}
-
-func (a android) runMake(dir string, params Params, extraArgs ...string) error {
-	return a.runMakeImpl(dir, params.TargetArch, params.Compiler, params.Linker, params.Ccache, params.KernelDir, extraArgs)
 }
 
 func (a android) writeFile(file string, data []byte) error {

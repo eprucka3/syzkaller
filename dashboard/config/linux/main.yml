@@ -35,6 +35,7 @@ includes:
  - stable-5.4.yml: [stable-5.4]
  - android-5.4.yml: [android-5.4]
  - android-5.10.yml: [android-5.10]
+ - android-5.10-virtual-modules.yml: [android-5.10-virtual-modules]
  - android-5.15.yml: [android-5.15]
  - chromeos-5.4.yml: [chromeos-5.4]
  - chromeos-5.10.yml: [chromeos-5.10]

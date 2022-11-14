@@ -2,5 +2,8 @@
 	"kernelConfig": "config/linux/android-5.10.config",
 	"modulesConfig": "config/linux/android-5.10-virtual-device.config",
 	"extModules": "common-modules/virtual-device",
-	"modulesScript": "config/android-modules/create-modules.sh"
+	"modulesScript": "config/android-modules/create-modules.sh",
+	"modulesEnvVars": [
+		"BUILD_GOLDFISH_DRIVERS=m"
+	]
 }
