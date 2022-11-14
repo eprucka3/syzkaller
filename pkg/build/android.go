@@ -15,7 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/sys/targets"
 )
@@ -185,14 +184,8 @@ func (a android) build(params Params) (ImageDetails, error) {
 		return details, fmt.Errorf("failed to build external modules: %v", err)
 	}
 
-	// Copy module functions to commonKernelDir
-	modulesScript := filepath.Base(paramsConfig.ModulesScript)
-	if err := osutil.CopyFile(paramsConfig.ModulesScript, filepath.Join(commonKernelDir, modulesScript)); err != nil {
-		return details, fmt.Errorf("failed to copy module functions: %v", err)
-	}
-
 	// Zip kernel headers
-	execModulesScript := fmt.Sprintf("./%v", modulesScript)
+	execModulesScript := fmt.Sprintf("./%v", paramsConfig.ModulesScript)
 	cmd := osutil.Command(execModulesScript, "zip_kernel_headers", commonKernelDir)
 	if err := a.runCmd(cmd, commonKernelDir, params.KernelDir); err != nil {
 		return details, fmt.Errorf("failed to zip kernel headers: %v", err)
@@ -268,7 +261,6 @@ func (a android) runCmd(cmd *exec.Cmd, runDir string, kernelDir string) error {
 			env[idx] = fmt.Sprintf("PATH=%v:%v", prebuiltsPath, curPath)
 		}
 	}
-	log.Logf(0, "LIZ_TESTING: env: %v", env)
 
 	cmd.Env = append([]string{}, env...)
 
@@ -276,7 +268,7 @@ func (a android) runCmd(cmd *exec.Cmd, runDir string, kernelDir string) error {
 	// 2 builds from the same sources should result in the same vmlinux binary.
 	// Build on a release commit and on the previous one should result in the same vmlinux too.
 	// We use it for detecting no-op changes during bisection.
-	// GOLDFISH_DRIVERS from build.config.virtual_device_kasan.x86_64
+	// GOLDFISH_DRIVERS from build.config.virtual_device_kasan.x86_64; potentially add way to pull necessary environment variables?
 	cmd.Env = append(cmd.Env,
 		"KBUILD_BUILD_VERSION=0",
 		"KBUILD_BUILD_TIMESTAMP=now",
@@ -287,10 +279,7 @@ func (a android) runCmd(cmd *exec.Cmd, runDir string, kernelDir string) error {
 		"BUILD_GOLDFISH_DRIVERS=m",
 	)
 	cmd.Dir = runDir
-	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
-	log.Logf(0, "LIZ_TESTING: dir: %v", cmd.Dir)
-	out, err := osutil.Run(time.Hour, cmd)
-	log.Logf(0, "LIZ_TESTING: %v", string(out))
+	_, err := osutil.Run(time.Hour, cmd)
 	return err
 }
 

@@ -23,14 +23,13 @@ import (
 
 const (
 	syzkallerRebuildPeriod = 12 * time.Hour
-	buildRetryPeriod       = 1 * time.Minute // used for both syzkaller and kernel
+	buildRetryPeriod       = 10 * time.Minute // used for both syzkaller and kernel
 )
 
 // SyzUpdater handles everything related to syzkaller updates.
 // As kernel builder, it maintains 2 builds:
-//   - latest: latest known good syzkaller build
-//   - current: currently used syzkaller build
-//
+//  - latest: latest known good syzkaller build
+//  - current: currently used syzkaller build
 // Additionally it updates and restarts the current executable as necessary.
 // Current executable is always built on the same revision as the rest of syzkaller binaries.
 type SyzUpdater struct {
@@ -110,8 +109,8 @@ func NewSyzUpdater(cfg *Config) *SyzUpdater {
 }
 
 // UpdateOnStart does 3 things:
-//   - ensures that the current executable is fresh
-//   - ensures that we have a working syzkaller build in current
+//  - ensures that the current executable is fresh
+//  - ensures that we have a working syzkaller build in current
 func (upd *SyzUpdater) UpdateOnStart(autoupdate bool, shutdown chan struct{}) {
 	os.RemoveAll(upd.currentDir)
 	latestTag := upd.checkLatest()
