@@ -15,7 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/sys/targets"
 )
@@ -112,6 +111,7 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 		}
 	}
 
+	// Make bzImage and modules
 	cmd, err = a.createMakeCmd(params, "bzImage", "modules", "prepare-objtool")
 	if err != nil {
 		return fmt.Errorf("failed to create command to make bzImage: %v", err)
@@ -121,6 +121,7 @@ func (a android) buildKernel(configPath []byte, params Params) error {
 		return fmt.Errorf("failed to make bzImage: %v", err)
 	}
 
+	// Install modules
 	moduleStagingDir := filepath.Join(commonKernelDir, "staging")
 	moduleInstallFlag := fmt.Sprintf("INSTALL_MOD_PATH=%v", moduleStagingDir)
 	cmd, err = a.createMakeCmd(params, "bzImage", moduleInstallFlag, "modules_install")
@@ -182,9 +183,6 @@ func (a android) build(params Params) (ImageDetails, error) {
 	}
 	commonKernelDir := filepath.Join(params.KernelDir, "common")
 
-	log.Logf(0, "LIZ_TESTING: SLEEP")
-	time.Sleep(time.Hour * 8)
-
 	// Parse input config
 	var paramsConfig ParamsConfig
 	if err = json.Unmarshal(params.Config, &paramsConfig); err != nil {
@@ -223,7 +221,10 @@ func (a android) build(params Params) (ImageDetails, error) {
 	}
 
 	// Zip kernel headers
-	execModulesScript := fmt.Sprintf("./%v", paramsConfig.ModulesScript)
+	if err := osutil.CopyFile(paramsConfig.ModulesScript, filepath.Join(commonKernelDir, filepath.Base(paramsConfig.ModulesScript))); err != nil {
+		return details, fmt.Errorf("failed to copy module script: %v", err)
+	}
+	execModulesScript := fmt.Sprintf("./%v", filepath.Base(paramsConfig.ModulesScript))
 	cmd := osutil.Command(execModulesScript, "zip_kernel_headers", commonKernelDir)
 	cmd.Dir = commonKernelDir
 	if err := a.runCmd(cmd, params.KernelDir); err != nil {

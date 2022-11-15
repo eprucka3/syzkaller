@@ -19,6 +19,12 @@ function create_modules_staging() {
   cp ${src_dir}/modules.order ${dest_dir}/modules.order
   cp ${src_dir}/modules.builtin ${dest_dir}/modules.builtin
 
+  # Add external modules
+  mkdir -p ${dest_dir}/extra/
+  cp -r ${src_dir}/extra/* ${dest_dir}/extra/
+  (cd ${dest_dir}/ && \
+      find extra -type f -name "*.ko" | sort >> modules.order)
+
   # Re-run depmod to detect any dependencies between in-kernel and externel
   # modules. The, create modules.order based on all the modules compiled.
   run_depmod ${dest_stage} "${version}" ${out_dir}
