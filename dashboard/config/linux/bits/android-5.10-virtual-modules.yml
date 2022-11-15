@@ -6,8 +6,9 @@
 
 # Following branch: android12-5.10-lts
 kernel:
- repo: https://android.googlesource.com/kernel/superproject
+ repo: https://android.googlesource.com/kernel/common
  tag: 8d21bcc704ea1
+
 
 shell:
  - make vd_x86_64_gki_defconfig
