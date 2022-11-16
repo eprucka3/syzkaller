@@ -282,6 +282,13 @@ bin/syz-fmt:
 configs: kconf
 	bin/syz-kconf -config dashboard/config/linux/main.yml -sourcedir $(SOURCEDIR)
 
+module_configs: kconf
+	# Modules: Need to create the defconfig from the superproject before creating the configs for the common kernel
+	# TODO: Expand this to create multiple configs from an input yml
+	./dashboard/config/android-modules/create_defconfig.sh $(SOURCEDIR)
+	# This is the same as main.yml with just the virtual-module config, as it errors unless the defconfig has been created beforehand.
+	bin/syz-kconf -config dashboard/config/linux/android-modules.yml -sourcedir $(SOURCEDIR)/common
+
 tidy: descriptions
 	clang-tidy -quiet -header-filter=.* -warnings-as-errors=* \
 		-checks=-*,misc-definitions-in-headers,bugprone-macro-parentheses,clang-analyzer-*,-clang-analyzer-security.insecureAPI*,-clang-analyzer-optin.performance* \
