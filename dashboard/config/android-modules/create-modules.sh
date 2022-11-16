@@ -64,7 +64,7 @@ function create_initramfs() {
   cp ${modules_root_dir}/modules.load ${out_dir}/vendor_boot.modules.load
 
   mkbootfs ${modules_staging_dir}/initramfs_staging >${modules_staging_dir}/initramfs.cpio
-  lz4 -c -l -12 --favor-decSpeed ${modules_staging_dir}/initramfs.cpio >${out_dir}/initramfs.img
+  gzip -c -f ${modules_staging_dir}/initramfs.cpio >${out_dir}/initramfs.img
 }
 
 # $1 Kernel common dir

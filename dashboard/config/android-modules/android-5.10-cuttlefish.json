@@ -1,6 +1,6 @@
 {
 	"kernelConfig": "config/linux/android-5.10.config",
-	"modulesConfig": "config/linux/android-5.10-virtual-device.config",
+	"modulesConfig": "config/linux/android-cuttlefish.config",
 	"extModules": "common-modules/virtual-device",
 	"modulesScript": "config/android-modules/create-modules.sh",
 	"modulesEnvVars": [
