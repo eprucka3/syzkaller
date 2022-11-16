@@ -1,0 +1,2 @@
+error reading progress from device-0:663825: run read progress 663825: worker closed connection: EOF
+SYZFAIL: proxy app plugin error

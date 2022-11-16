@@ -370,6 +370,12 @@ func (ctx *linux) Symbolize(rep *Report) error {
 
 	rep.Report = ctx.decompileOpcodes(rep.Report, rep)
 
+	// Skip getting maintainers for Android fuzzing since the kernel source
+	// directory structure is different.
+	if ctx.config.vmType == "cuttlefish" || ctx.config.vmType == "proxyapp" {
+		return nil
+	}
+
 	// We still do this even if we did not symbolize,
 	// because tests pass in already symbolized input.
 	rep.guiltyFile = ctx.extractGuiltyFile(rep)
@@ -1021,7 +1027,10 @@ var linuxStackParams = &stackParams{
 	},
 	frameRes: []*regexp.Regexp{
 		compile("^ *(?:{{PC}} ){0,2}{{FUNC}}"),
-		compile(`^ *{{PC}} \([a-zA-Z0-9_]+\) from {{PC}} \({{FUNC}}`), // arm is totally different
+		// Arm is totally different.
+		// Extract both current and next frames. This is needed for the top
+		// frame which is present only in LR register which we don't parse.
+		compile(`^ *{{PC}} \(([a-zA-Z0-9_.]+)\) from {{PC}} \({{FUNC}}`),
 	},
 	skipPatterns: []string{
 		"__sanitizer",
@@ -1031,6 +1040,8 @@ var linuxStackParams = &stackParams{
 		"kmsan",
 		"kcsan_setup_watchpoint",
 		"check_memory_region",
+		"check_heap_object",
+		"check_object",
 		"read_word_at_a_time",
 		"(read|write)_once_.*nocheck",
 		"print_address_description",
@@ -1057,6 +1068,7 @@ var linuxStackParams = &stackParams{
 		"kzalloc",
 		"krealloc",
 		"kmem_cache",
+		"allocate_slab",
 		"slab_",
 		"debug_object",
 		"timer_is_static_object",
@@ -1159,6 +1171,7 @@ var linuxStackParams = &stackParams{
 		"flush_workqueue",
 		"drain_workqueue",
 		"destroy_workqueue",
+		"queue_work",
 		"finish_wait",
 		"kthread_stop",
 		"kobject_",

@@ -1,0 +1,25 @@
+{
+  "target": "linux/arm64",
+  "reproduce": true,
+  "workdir": "/usr/local/google/home/lizprucka/syzkaller/out",
+  "http": "localhost:50001",
+  "syzkaller": "/usr/local/google/home/lizprucka/syzkaller",
+  "suppressions": [
+    "do_rt_sigqueueinfo",
+    "do_rt_tgsigqueueinfo"
+  ],
+  "vm": {
+	  "cmd": "/usr/local/google/home/lizprucka/syzkaller/local"
+  },
+  "kernel_obj": "/usr/local/google/home/lizprucka/kasan_artifacts/common-android12-5.10",
+  "disable_syscalls": [],
+  "sandbox": "android",
+  "sandbox_arg": 1,
+  "ignores": [
+    "WARNING:",
+    "INFO:"
+  ],
+  "type": "proxyapp",
+  "procs": 1,
+  "cover": true
+}
