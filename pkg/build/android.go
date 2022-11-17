@@ -15,7 +15,6 @@ import (
 	"strings"
 	"time"
 
-	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/sys/targets"
 )
@@ -190,24 +189,23 @@ func (a android) build(params Params) (ImageDetails, error) {
 		return details, fmt.Errorf("failed to unmarshal kernel config json: %v", err)
 	}
 
-	// var kernelConfig, modulesConfig []byte
-	var modulesConfig []byte
-	// kernelConfig, err = ioutil.ReadFile(paramsConfig.KernelConfig)
-	// if err != nil {
-	// 	return details, fmt.Errorf("failed to read kernel config: %v", err)
-	// }
+	var kernelConfig, modulesConfig []byte
+	kernelConfig, err = ioutil.ReadFile(paramsConfig.KernelConfig)
+	if err != nil {
+		return details, fmt.Errorf("failed to read kernel config: %v", err)
+	}
 	modulesConfig, err = ioutil.ReadFile(paramsConfig.ModulesConfig)
 	if err != nil {
 		return details, fmt.Errorf("failed to read modules config: %v", err)
 	}
 
-	// // Build common kernel
-	// if err := a.buildKernel(kernelConfig, params); err != nil {
-	// 	return details, fmt.Errorf("failed to build android common kernel: %v", err)
-	// }
-	// if err := osutil.CopyFile(filepath.Join(params.OutputDir, "kernel.config"), filepath.Join(params.OutputDir, "common-kernel.config")); err != nil {
-	// 	return details, fmt.Errorf("failed to copy kernel config file: %v", err)
-	// }
+	// Build common kernel
+	if err := a.buildKernel(kernelConfig, params); err != nil {
+		return details, fmt.Errorf("failed to build android common kernel: %v", err)
+	}
+	if err := osutil.CopyFile(filepath.Join(params.OutputDir, "kernel.config"), filepath.Join(params.OutputDir, "common-kernel.config")); err != nil {
+		return details, fmt.Errorf("failed to copy kernel config file: %v", err)
+	}
 
 	// Build modules
 	if err := a.buildKernel(modulesConfig, params); err != nil {
@@ -278,9 +276,6 @@ func (a android) build(params Params) (ImageDetails, error) {
 	if err != nil {
 		return details, fmt.Errorf("failed to generate signature: %s", err)
 	}
-
-	log.Logf(0, "LIZ_TESTING: DONE. Sleeping")
-	time.Sleep(time.Hour)
 
 	return details, nil
 }

@@ -283,11 +283,15 @@ configs: kconf
 	bin/syz-kconf -config dashboard/config/linux/main.yml -sourcedir $(SOURCEDIR)
 
 module_configs: kconf
-	# Modules: Need to create the defconfig from the superproject before creating the configs for the common kernel
-	# TODO: Expand this to create multiple configs from an input yml
+	# TODO: This currently only creates config file for android-cuttlefish.config.
+	# Need to expand the create_defconfig and update_module_config scripts to account
+	# for multiple configs.
+	#
+	# This creates the defconfig from the superproject
 	./dashboard/config/android-modules/create_defconfig.sh $(SOURCEDIR)
 	# This is the same as main.yml with just the virtual-module config, as it errors unless the defconfig has been created beforehand.
 	bin/syz-kconf -config dashboard/config/linux/android-modules.yml -sourcedir $(SOURCEDIR)/common
+	# This updates the module configs
 
 tidy: descriptions
 	clang-tidy -quiet -header-filter=.* -warnings-as-errors=* \
