@@ -1,0 +1,14 @@
+#!/bin/bash
+
+# $1: Android common directory
+# $2: Config file to merge
+# $3: Module fragment to merge
+# $4: Output file name
+KERNEL_DIR=$1
+CONFIG=$2
+MODULE_FRAGMENT=$3
+OUT_FILE=$4
+MERGE_DEFCONFIG_CMDS="KCONFIG_CONFIG=${OUT_FILE} ${KERNEL_DIR}/scripts/kconfig/merge_config.sh -m -r ${CONFIG} ${MODULE_FRAGMENT}" 
+
+eval $MERGE_DEFCONFIG_CMDS
+
