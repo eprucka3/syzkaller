@@ -14,6 +14,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/sys/targets"
 )
@@ -115,7 +116,7 @@ func (a android) buildCommonKernel(params Params) error {
 	// Install common modules.
 	moduleStagingDir := filepath.Join(commonKernelDir, "staging")
 	moduleInstallFlag := fmt.Sprintf("INSTALL_MOD_PATH=%v", moduleStagingDir)
-	cmd, err = a.makeCmd(params, "bzImage", moduleInstallFlag, "modules_install")
+	cmd, err = a.makeCmd(params, moduleInstallFlag, "modules_install")
 	if err != nil {
 		return fmt.Errorf("failed to create command to install modules: %v", err)
 	}
@@ -187,14 +188,14 @@ func (a android) build(params Params) (ImageDetails, error) {
 	// Zip kernel headers.
 	execHeadersScript := fmt.Sprintf("./%v", headersScript)
 	cmd := osutil.Command(execHeadersScript, commonKernelDir)
-	if err := a.runCmd(cmd, ""); err != nil {
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
 		return details, fmt.Errorf("failed to zip kernel headers: %v", err)
 	}
 
 	// Create initramfs image.
 	execInitramfsScript := fmt.Sprintf("./%v", initramfsScript)
 	cmd = osutil.Command(execInitramfsScript, commonKernelDir)
-	if err := a.runCmd(cmd, ""); err != nil {
+	if err := a.runCmd(cmd, params.KernelDir); err != nil {
 		return details, fmt.Errorf("failed to create initramfs image: %v", err)
 	}
 
@@ -231,6 +232,9 @@ func (a android) build(params Params) (ImageDetails, error) {
 	if err := osutil.CopyFile(initramfs, filepath.Join(params.OutputDir, "obj", "initrd")); err != nil {
 		return details, err
 	}
+	if err := osutil.CopyFile(bzImage, filepath.Join(params.OutputDir, "obj", "bzImage")); err != nil {
+		return details, err
+	}
 
 	details.Signature, err = elfBinarySignature(vmlinux, params.Tracer)
 	if err != nil {
@@ -244,6 +248,7 @@ func (a android) makeCmd(params Params, extraArgs ...string) (*exec.Cmd, error) 
 	target := targets.Get(targets.Linux, params.TargetArch)
 	args := LinuxMakeArgs(target, params.Compiler, params.Linker, params.Ccache, "")
 	args = append(args, extraArgs...)
+	args = append(args, "CROSS_COMPILE=x86_64-linux-gnu-", "LD=ld.lld")
 	cmd := osutil.Command("make", args...)
 	if err := osutil.Sandbox(cmd, true, true); err != nil {
 		return cmd, err
@@ -271,7 +276,11 @@ func (a android) runCmd(cmd *exec.Cmd, kernelDir string) error {
 		"KERNELVERSION=syzkaller",
 		"LOCALVERSION=-syzkaller",
 	)
-	_, err := osutil.Run(time.Hour, cmd)
+	log.Logf(0, "LIZ_TESTING: env: %v", cmd.Env)
+	log.Logf(0, "LIZ_TESTING: dir: %v", cmd.Dir)
+	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
+	out, err := osutil.Run(time.Hour, cmd)
+	log.Logf(0, "LIZ_TESTING: out: %v", string(out))
 	return err
 }
 
