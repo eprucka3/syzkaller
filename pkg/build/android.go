@@ -255,7 +255,7 @@ func (a android) runCmd(cmd *exec.Cmd, kernelDir string) error {
 	// Pre-append prebuilts to path.
 	absPrebuiltsPath := filepath.Join(kernelDir, prebuiltsPath)
 	curPath := os.Getenv("PATH")
-	cmd.Env = append(os.Environ(), fmt.Sprintf("PATH=%v:%v", absPrebuiltsPath, curPath))
+	cmd.Env = append([]string{fmt.Sprintf("PATH=%v:%v", absPrebuiltsPath, curPath)}, os.Environ()...)
 
 	cmd.Env = append(cmd.Env,
 		"KBUILD_BUILD_VERSION=0",
