@@ -13,6 +13,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/sys/targets"
 )
@@ -264,6 +265,7 @@ func (a android) runCmd(cmd *exec.Cmd, kernelDir string) error {
 		"KERNELVERSION=syzkaller",
 		"LOCALVERSION=-syzkaller",
 	)
+	log.Logf(0, "LIZ_TESTING: Path: %v", cmd.Env)
 	_, err := osutil.Run(time.Hour, cmd)
 	return err
 }
