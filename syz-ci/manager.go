@@ -123,7 +123,12 @@ func createManager(cfg *Config, mgrcfg *ManagerConfig, stop chan struct{},
 	if err != nil {
 		log.Fatalf("failed to create repo for %v: %v", mgrcfg.Name, err)
 	}
+	// Build from common directory of superproject
+	if mgrcfg.managercfg.Type == "cuttlefish" {
+		kernelDir = filepath.Join(kernelDir, "common")
+	}
 
+	log.Logf(0, "LIZ_TESTING: kernelDir: %v", kernelDir)
 	mgr := &Manager{
 		name:         mgrcfg.managercfg.Name,
 		workDir:      filepath.Join(dir, "workdir"),
@@ -328,6 +333,7 @@ func (mgr *Manager) build(kernelCommit *vcs.Commit) error {
 		SysctlFile:   mgr.mgrcfg.KernelSysctl,
 		Config:       mgr.configData,
 	}
+	log.Logf(0, "kernelDir in params: %v", mgr.kernelDir)
 	details, err := build.Image(params)
 	info := mgr.createBuildInfo(kernelCommit, details.CompilerID)
 	if err != nil {
@@ -548,6 +554,7 @@ func (mgr *Manager) writeConfig(buildTag string) (string, error) {
 	// update the source, or even delete and re-clone. If this causes
 	// problems, we need to make a copy of sources after build.
 	mgrcfg.KernelSrc = mgr.kernelDir
+	log.Logf(0, "kernelSrc: %v", mgrcfg.KernelSrc)
 	if err := mgrconfig.Complete(mgrcfg); err != nil {
 		return "", fmt.Errorf("bad manager config: %v", err)
 	}

@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"github.com/google/syzkaller/pkg/debugtracer"
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/sys/targets"
 )
@@ -60,6 +61,30 @@ func (linux linux) build(params Params) (ImageDetails, error) {
 		if err := osutil.CopyFile(params.UserspaceDir, filepath.Join(params.OutputDir, "image")); err != nil {
 			return details, err
 		}
+	} else if params.VMType == "cuttlefish" {
+		// Embed vmlinux and bzImage
+		bzImagePath := filepath.Join(params.KernelDir, filepath.FromSlash("arch/x86/boot/bzImage"))
+		outputObjPath := filepath.Join(params.OutputDir, "obj")
+		if err := osutil.CopyFile(bzImagePath, filepath.Join(outputObjPath, "bzImage")); err != nil {
+			return details, err
+		}
+
+		if err := embedFiles(params, func(mountDir string) error {
+			homeDir := filepath.Join(mountDir, "root")
+
+			if err := osutil.CopyFile(filepath.Join(outputObjPath, "bzImage"), filepath.Join(homeDir, "bzImage")); err != nil {
+				return err
+			}
+
+			if err := osutil.CopyFile(filepath.Join(outputObjPath, "vmlinux"), filepath.Join(homeDir, "vmlinux")); err != nil {
+				return err
+			}
+
+			return nil
+		}); err != nil {
+			return details, err
+		}
+
 	} else if err := embedLinuxKernel(params, kernelPath); err != nil {
 		return details, err
 	}
@@ -206,6 +231,7 @@ func LinuxMakeArgs(target *targets.Target, compiler, linker, ccache, buildDir st
 	if linker != "" {
 		args = append(args, "LD="+linker)
 	}
+	log.Logf(0, "LIZ_TESTING: buildDir: %v", buildDir)
 	if buildDir != "" {
 		args = append(args, "O="+buildDir)
 	}

@@ -17,6 +17,8 @@ import (
 	"sync"
 	"syscall"
 	"time"
+
+	"github.com/google/syzkaller/pkg/log"
 )
 
 const (
@@ -35,6 +37,8 @@ func RunCmd(timeout time.Duration, dir, bin string, args ...string) ([]byte, err
 // Run runs cmd with the specified timeout.
 // Returns combined output. If the command fails, err includes output.
 func Run(timeout time.Duration, cmd *exec.Cmd) ([]byte, error) {
+	log.Logf(0, "args: %v", cmd.Args)
+	log.Logf(0, "dir: %v", cmd.Dir)
 	output := new(bytes.Buffer)
 	if cmd.Stdout == nil {
 		cmd.Stdout = output
