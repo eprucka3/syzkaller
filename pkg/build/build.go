@@ -132,8 +132,6 @@ func getBuilder(targetOS, targetArch, vmType string) (builder, error) {
 	if targetOS == targets.Linux {
 		if vmType == "gvisor" {
 			return gvisor{}, nil
-		} else if vmType == "cuttlefish" {
-			return android{}, nil
 		}
 	}
 	builders := map[string]builder{
