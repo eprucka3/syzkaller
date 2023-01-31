@@ -34,6 +34,3 @@ config:
 
  # Android has back-ported the KASAN_STACK_ENABLE => KASAN_STACK rename from v5.11
  - KASAN_STACK_ENABLE: [n, override]
- # Doesn't boot on Cuttlefish with KASAN_STACK
- # TODO: re-enable once KASAN_STACK works with Cuttlefish
- - KASAN_STACK: [override, -cuttlefish]

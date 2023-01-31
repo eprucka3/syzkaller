@@ -10,4 +10,10 @@ kernel:
  tag: 889a0c39fef31
 
 shell:
- - make gki_defconfig
+ - make gki_defconfig: [-cuttlefish]
+ - cp /syzkaller/gopath/src/github.com/google/syzkaller/dashboard/config/android-modules/android-5.15/vd_x86_64_gki_defconfig arch/x86/configs/: [cuttlefish]
+ - make vd_x86_64_gki_defconfig: [cuttlefish]
+
+config:
+  # TODO: KASAN_INLINE is broken for cuttlefish on android13-5.15. Remove -cuttlefish once fixed.
+  - KASAN_INLINE: [override, -cuttlefish]
