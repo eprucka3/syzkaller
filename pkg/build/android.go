@@ -102,7 +102,7 @@ func (a android) buildCommonKernel(params Params) error {
 	}
 
 	// Make kernel image and prepare common kernel for modules.
-	cmd, err = a.makeCmd(params, "bzImage", "modules")
+	cmd, err = a.makeCmd(params, "bzImage", "modules", "prepare-objtool")
 	if err != nil {
 		return fmt.Errorf("failed to create command to make bzImage: %v", err)
 	}
@@ -139,7 +139,7 @@ func (a android) buildExtModules(params Params) error {
 	// Make external modules.
 	cmd, err := a.makeCmd(params, "-C", modulePath, mFlag, srcFlag, moduleInstallFlag)
 	if err != nil {
-		return fmt.Errorf("failed to create command to make external modules modules: %v", err)
+		return fmt.Errorf("failed to create command to make external modules: %v", err)
 	}
 	cmd.Dir = params.KernelDir
 	cmd.Env = append([]string{}, moduleEnvVar)
