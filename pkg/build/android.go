@@ -102,7 +102,7 @@ func (a android) buildCommonKernel(params Params) error {
 	}
 
 	// Make kernel image and prepare common kernel for modules.
-	cmd, err = a.makeCmd(params, "bzImage", "modules", "prepare-objtool")
+	cmd, err = a.makeCmd(params, "bzImage", "modules")
 	if err != nil {
 		return fmt.Errorf("failed to create command to make bzImage: %v", err)
 	}
