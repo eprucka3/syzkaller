@@ -1,0 +1,15 @@
+# Copyright 2022 syzkaller project authors. All rights reserved.
+# Use of this source code is governed by Apache 2 LICENSE that can be found in the LICENSE file.
+
+# See https://source.android.com/setup/build/building-kernels
+# for details on how to checkout and build Android kernel.
+
+# Following branch: android14-6.1
+kernel:
+ repo: https://android.googlesource.com/kernel/common
+ tag: 9834c26bae732ca9ada454ba703b3bc5f1840b13
+
+shell:
+ - make gki_defconfig: [-cuttlefish]
+ - cp /syzkaller/gopath/src/github.com/google/syzkaller/dashboard/config/android-modules/android-6.1/vd_x86_64_gki_defconfig arch/x86/configs/: [cuttlefish]
+ - make vd_x86_64_gki_defconfig: [cuttlefish]
