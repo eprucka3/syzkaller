@@ -177,9 +177,9 @@ func (git *git) reset() error {
 		return nil
 	}
 	git.git("reset", "--hard")
-	git.git("submodule", "foreach", "--recursive", "git", "reset", "--hard")
+	// git.git("reset", "--hard", "--recurse-submodule")
 	git.git("clean", "-fdx")
-	git.git("submodule", "foreach", "--recursive", "git", "clean", "-fdx")
+	// git.git("submodule", "foreach", "--recursive", "git", "clean", "-fdx")
 	git.git("bisect", "reset")
 	_, err := git.git("reset", "--hard")
 	return err
