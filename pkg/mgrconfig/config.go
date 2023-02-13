@@ -192,9 +192,7 @@ type Config struct {
 	// VM-type-specific parameters.
 	// Parameters for concrete types are in Config type in vm/TYPE/TYPE.go, e.g. vm/qemu/qemu.go.
 	VM json.RawMessage `json:"vm"`
-	// Build-type-specific parameters.
-	// Parameters for concrete types are in Config type in pkg/build/TYPE.go, e.g. pkg/build/android.go.
-	Build json.RawMessage `json:"build"`
+
 	// Asset storage configuration. There can be specified the upload location and crash assets
 	// to upload.
 	// A sample config:

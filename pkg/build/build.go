@@ -6,7 +6,6 @@ package build
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -36,7 +35,6 @@ type Params struct {
 	SysctlFile   string
 	Config       []byte
 	Tracer       debugtracer.DebugTracer
-	Build	     json.RawMessage
 }
 
 // Information that is returned from the Image function.
@@ -71,7 +69,7 @@ func Image(params Params) (details ImageDetails, err error) {
 		params.Tracer = &debugtracer.NullTracer{}
 	}
 	var builder builder
-	builder, err = getBuilder(params.TargetOS, params.TargetArch, params.VMType, params.Build)
+	builder, err = getBuilder(params.TargetOS, params.TargetArch, params.VMType)
 	if err != nil {
 		return
 	}
@@ -106,8 +104,8 @@ func Image(params Params) (details ImageDetails, err error) {
 	return
 }
 
-func Clean(targetOS, targetArch, vmType, buildConfig, kernelDir string) error {
-	builder, err := getBuilder(targetOS, targetArch, vmType, buildConfig)
+func Clean(targetOS, targetArch, vmType, kernelDir string) error {
+	builder, err := getBuilder(targetOS, targetArch, vmType)
 	if err != nil {
 		return err
 	}
@@ -130,13 +128,13 @@ type builder interface {
 	clean(kernelDir, targetArch string) error
 }
 
-func getBuilder(targetOS, targetArch, vmType string, buildConfig string) (builder, error) {
+func getBuilder(targetOS, targetArch, vmType string) (builder, error) {
 	if targetOS == targets.Linux {
 		if vmType == "gvisor" {
 			return gvisor{}, nil
 		} else if vmType == "cuttlefish" {
 			return cuttlefish{}, nil
-		} else if buildConfig == "pixel" {
+		} else if vmType == "pixel" {
 			return android{}, nil
 		}
 	}

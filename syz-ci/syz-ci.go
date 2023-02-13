@@ -175,7 +175,6 @@ type ManagerConfig struct {
 
 	ManagerConfig json.RawMessage `json:"manager_config"`
 	managercfg    *mgrconfig.Config
-	Build		json.RawMessage `json:"build"`
 }
 
 type ManagerJobs struct {
