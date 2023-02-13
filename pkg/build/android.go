@@ -9,7 +9,7 @@ import (
 	"path/filepath"
 	"regexp"
 	"time"
-
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 )
 
@@ -43,6 +43,9 @@ func (a android) build(params Params) (ImageDetails, error) {
 	cmd := osutil.Command(fmt.Sprintf("./build_%v.sh", params.Compiler))
 	cmd.Dir = params.KernelDir
 	cmd.Env = append(cmd.Env, "OUT_DIR=out", "DIST_DIR=dist")
+	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
+	log.Logf(0, "LIZ_TESTING: dir: %v", cmd.Dir)
+	
 	if _, err := osutil.Run(time.Hour, cmd); err != nil {
 		return details, fmt.Errorf("failed to build kernel: %s", err)
 	}
