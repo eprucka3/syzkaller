@@ -54,7 +54,8 @@ func (a android) build(params Params) (ImageDetails, error) {
 	// Zip kernel images.
 	buildDistDir := filepath.Join(params.KernelDir, "dist")
 	dtboImage := filepath.Join(buildDistDir, "dtbo.img")
-	vendorBootImage := filepath.Join(buildDistDir, "vendor_boot.img")
+	//TODO: vendor_kernel_boot for cloudripper, vendor_boot for slider
+	vendorBootImage := filepath.Join(buildDistDir, "vendor_kernel_boot.img")
 	bootImage := filepath.Join(buildDistDir, "boot.img")
 	vendorDlkmImage := filepath.Join(buildDistDir, "vendor_dlkm.img")
 	vmlinux := filepath.Join(buildDistDir, "vmlinux")
