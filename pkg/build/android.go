@@ -41,7 +41,8 @@ func (a android) build(params Params) (ImageDetails, error) {
 	// Compiler should match the build for the device (e.g. slider, bluejay...)
 	cmd := osutil.Command(fmt.Sprintf("./build_%v.sh", params.Compiler))
 	cmd.Dir = params.KernelDir
-	defconfigFragment := filepath.Join("private", "gs-google", fmt.Sprintf("build.config.%v.kasan", params.Compiler))
+	// No cloudripper kasan config; currently only slider has a kasan config
+	defconfigFragment := filepath.Join("private", "gs-google", "build.config.slider.kasan")
 	buildTarget := fmt.Sprintf("%v_gki_kasan", params.Compiler)
 	cmd.Env = append(cmd.Env, "OUT_DIR=out", "DIST_DIR=dist", fmt.Sprintf("GKI_DEFCONFIG_FRAGMENT=%v", defconfigFragment), fmt.Sprintf("BUILD_TARGET=%v", buildTarget))
 	
