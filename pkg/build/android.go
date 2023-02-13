@@ -9,7 +9,6 @@ import (
 	"path/filepath"
 	"regexp"
 	"time"
-	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 )
 
@@ -45,8 +44,6 @@ func (a android) build(params Params) (ImageDetails, error) {
 	defconfigFragment := filepath.Join("private", "gs-google", fmt.Sprintf("build.config.%v.kasan", params.Compiler))
 	buildTarget := fmt.Sprintf("%v_gki_kasan", params.Compiler)
 	cmd.Env = append(cmd.Env, "OUT_DIR=out", "DIST_DIR=dist", fmt.Sprintf("GKI_DEFCONFIG_FRAGMENT=%v", defconfigFragment), fmt.Sprintf("BUILD_TARGET=%v", buildTarget))
-	log.Logf(0, "LIZ_TESTING: cmd: %v", cmd.Args)
-	log.Logf(0, "LIZ_TESTING: dir: %v", cmd.Dir)
 	
 	if _, err := osutil.Run(time.Hour, cmd); err != nil {
 		return details, fmt.Errorf("failed to build kernel: %s", err)
