@@ -134,7 +134,7 @@ func getBuilder(targetOS, targetArch, vmType string) (builder, error) {
 			return gvisor{}, nil
 		} else if vmType == "cuttlefish" {
 			return cuttlefish{}, nil
-		} else if vmType == "pixel" {
+		} else if vmType == "androiddeviceproxy" {
 			return android{}, nil
 		}
 	}

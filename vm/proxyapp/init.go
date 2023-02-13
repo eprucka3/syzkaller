@@ -33,6 +33,13 @@ func init() {
 			return ctor(makeDefaultParams(), env)
 		},
 		false)
+
+	vmimpl.Register(
+		"androiddeviceproxy",
+		func(env *vmimpl.Env) (vmimpl.Pool, error) {
+			return ctor(makeDefaultParams(), env)
+		},
+		false)
 }
 
 // Package configuration VARs are mostly needed for tests.
