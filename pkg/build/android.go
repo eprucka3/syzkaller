@@ -73,22 +73,22 @@ func (a android) build(params Params) (ImageDetails, error) {
 		homeDir := filepath.Join(mountDir, "root")
 
 		if err := osutil.CopyFile(kernelImages, filepath.Join(homeDir, kernelImagesName)); err != nil {
-			return err
+			return fmt.Errorf("failed to copy kernel images: %v", err)
 		}
 		if err := osutil.CopyFile(vmlinux, filepath.Join(homeDir, "vmlinux")); err != nil {
-			return err
+			return fmt.Errorf("failed to copy vmlinux: %v", err)
 		}
 
 		return nil
 	}); err != nil {
-		return details, err
+		return details, fmt.Errorf("failed to embed files: %v", err)
 	}
 
 	if err := osutil.CopyFile(vmlinux, filepath.Join(params.OutputDir, "obj", "vmlinux")); err != nil {
-		return details, err
+		return details, fmt.Errorf("failed to copy vmlinux: %v", err)
 	}
 	if err := osutil.CopyFile(config, filepath.Join(params.OutputDir, "obj", "kernel.config")); err != nil {
-		return details, err
+		return details, fmt.Errorf("failed to copy kernel config: %v", err)
 	}
 
 	details.Signature, err = elfBinarySignature(vmlinux, params.Tracer)
@@ -101,7 +101,10 @@ func (a android) build(params Params) (ImageDetails, error) {
 
 func (a android) clean(kernelDir, targetArch string) error {
 	if err := osutil.RemoveAll(filepath.Join(kernelDir, "out")); err != nil {
-		return err
+		return fmt.Errorf("failed to clean 'out' directory: %v", err)
 	}
-	return osutil.RemoveAll(filepath.Join(kernelDir, "dist"));
+	if err := osutil.RemoveAll(filepath.Join(kernelDir, "dist")); err != nil {
+		return fmt.Errorf("failed to clean 'dist' directory: %v", err)
+	}
+	return nil
 }
