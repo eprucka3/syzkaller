@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 )
 
@@ -99,6 +100,7 @@ func (c cuttlefish) build(params Params) (ImageDetails, error) {
 			return details, fmt.Errorf("failed to find build config: %v", err)
 		}
 		config = filepath.Join(params.KernelDir, strings.TrimSpace(string(configBytes)))
+		log.Logf(0, "LIZ_TESTING: config: %v", config)
 	} else {
 		if err := c.runBuild(params.KernelDir, kernelConfig); err != nil {
 			return details, fmt.Errorf("failed to build kernel: %s", err)
@@ -114,22 +116,26 @@ func (c cuttlefish) build(params Params) (ImageDetails, error) {
 	vmlinux := filepath.Join(buildDistDir, "vmlinux")
 	initramfs := filepath.Join(buildDistDir, "initramfs.img")
 
+	log.Logf(0, "LIZ_TESTING: reading compiler")
 	details.CompilerID, err = c.readCompiler(filepath.Join(buildDistDir, "kernel-headers.tar.gz"))
 	if err != nil {
-		return details, err
+		return details, fmt.Errorf("LIZ_TESTING: Failed reading compiler: %v", err)
 	}
 
 	if err := embedFiles(params, func(mountDir string) error {
 		homeDir := filepath.Join(mountDir, "root")
 
+		log.Logf(0, "LIZ_TESTING: copying bzImage")
 		if err := osutil.CopyFile(bzImage, filepath.Join(homeDir, "bzImage")); err != nil {
-			return err
+			return fmt.Errorf("LIZ_TESTING: %v, %v", bzImage, err)
 		}
+		log.Logf(0, "LIZ_TESTING: copying vmlinux")
 		if err := osutil.CopyFile(vmlinux, filepath.Join(homeDir, "vmlinux")); err != nil {
-			return err
+			return fmt.Errorf("LIZ_TESTING: %v, %v", vmlinux, err)
 		}
+		log.Logf(0, "LIZ_TESTING: copying initramfs")
 		if err := osutil.CopyFile(initramfs, filepath.Join(homeDir, "initramfs.img")); err != nil {
-			return err
+			return fmt.Errorf("LIZ_TESTING: %v, %v", initramfs, err)
 		}
 
 		return nil
@@ -137,14 +143,17 @@ func (c cuttlefish) build(params Params) (ImageDetails, error) {
 		return details, err
 	}
 
+	log.Logf(0, "LIZ_TESTING: copying2 vmlinux")
 	if err := osutil.CopyFile(vmlinux, filepath.Join(params.OutputDir, "obj", "vmlinux")); err != nil {
-		return details, err
+		return details, fmt.Errorf("LIZ_TESTING_2nd: %v, %v", vmlinux, err)
 	}
+	log.Logf(0, "LIZ_TESTING: copying2 initrd")
 	if err := osutil.CopyFile(initramfs, filepath.Join(params.OutputDir, "obj", "initrd")); err != nil {
-		return details, err
+		return details, fmt.Errorf("LIZ_TESTING_2nd: %v, %v", initramfs, err)
 	}
+	log.Logf(0, "LIZ_TESTING: copying2 config")
 	if err := osutil.CopyFile(config, filepath.Join(params.OutputDir, "kernel.config")); err != nil {
-		return details, err
+		return details, fmt.Errorf("LIZ_TESTING_2nd: %v, %v", config, err)
 	}
 
 	details.Signature, err = elfBinarySignature(vmlinux, params.Tracer)

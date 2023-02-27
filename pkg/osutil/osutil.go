@@ -8,6 +8,7 @@ import (
 	"compress/gzip"
 	"context"
 	"fmt"
+	"github.com/google/syzkaller/pkg/log"
 	"io"
 	"os"
 	"os/exec"
@@ -35,6 +36,7 @@ func RunCmd(timeout time.Duration, dir, bin string, args ...string) ([]byte, err
 // Returns combined output. If the command fails, err includes output.
 func Run(timeout time.Duration, cmd *exec.Cmd) ([]byte, error) {
 	output := new(bytes.Buffer)
+	log.Logf(0, "LIZ_TESTING: %v: %v", cmd.Dir, cmd.Args)
 	if cmd.Stdout == nil {
 		cmd.Stdout = output
 	}
