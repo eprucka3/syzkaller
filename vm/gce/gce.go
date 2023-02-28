@@ -494,16 +494,16 @@ func uploadImageToGCS(localImage, gcsImage string) error {
 		return fmt.Errorf("failed to write image tar header: %v", err)
 	}
 	if _, err := io.Copy(tarWriter, localReader); err != nil {
-		return fmt.Errorf("failed to write image file: %v", err)
+		return fmt.Errorf("failed to write image file1: %v", err)
 	}
 	if err := tarWriter.Close(); err != nil {
-		return fmt.Errorf("failed to write image file: %v", err)
+		return fmt.Errorf("failed to write image file2: %v", err)
 	}
 	if err := gzipWriter.Close(); err != nil {
-		return fmt.Errorf("failed to write image file: %v", err)
+		return fmt.Errorf("failed to write image file3: %v", err)
 	}
 	if err := gcsWriter.Close(); err != nil {
-		return fmt.Errorf("failed to write image file: %v", err)
+		return fmt.Errorf("failed to write image file4: %v", err)
 	}
 	return nil
 }

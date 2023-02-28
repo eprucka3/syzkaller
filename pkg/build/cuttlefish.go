@@ -41,11 +41,14 @@ func (c cuttlefish) runBazel(kernelDir string) error {
 }
 
 func (c cuttlefish) readCompiler(archivePath string) (string, error) {
+	log.Logf(0, "LIZ_TESTING: In readCompiler: %v", archivePath)
 	f, err := os.Open(archivePath)
 	if err != nil {
+		log.Logf(0, "LIZ_TESTING: open error")
 		return "", err
 	}
 	defer f.Close()
+	log.Logf(0, "LIZ_TESTING: Opened")
 
 	gr, err := gzip.NewReader(f)
 	if err != nil {
@@ -64,6 +67,7 @@ func (c cuttlefish) readCompiler(archivePath string) (string, error) {
 			}
 			result := linuxCompilerRegexp.FindSubmatch(bytes)
 			if result == nil {
+				log.Logf(0, "LIZ_TESTING: Unable to find build information")
 				return "", fmt.Errorf("include/generated/compile.h does not contain build information")
 			}
 
@@ -87,14 +91,14 @@ func (c cuttlefish) build(params Params) (ImageDetails, error) {
 	var config string
 	var err error
 	// Clean output directory if it exists.
-	if err := osutil.RemoveAll(filepath.Join(params.KernelDir, "out")); err != nil {
-		return details, fmt.Errorf("failed to clean before kernel build: %v", err)
-	}
+	// if err := osutil.RemoveAll(filepath.Join(params.KernelDir, "out")); err != nil {
+	// 	return details, fmt.Errorf("failed to clean before kernel build: %v", err)
+	// }
 	// Default to build.sh if compiler is not specified.
 	if params.Compiler == "bazel" {
-		if err := c.runBazel(params.KernelDir); err != nil {
-			return details, fmt.Errorf("failed to build kernel: %s", err)
-		}
+		// if err := c.runBazel(params.KernelDir); err != nil {
+		// 	return details, fmt.Errorf("failed to build kernel: %s", err)
+		// }
 		// Find the .config file; it is placed in a temporary output directory during the build.
 		cmd := osutil.Command("find", ".", "-wholename", "*virtual_device_x86_64_config/out_dir/.config")
 		cmd.Dir = params.KernelDir
@@ -122,6 +126,7 @@ func (c cuttlefish) build(params Params) (ImageDetails, error) {
 	if err != nil {
 		return details, err
 	}
+	log.Logf(0, "LIZ_TESTING: read compiler")
 
 	if err := embedFiles(params, func(mountDir string) error {
 		homeDir := filepath.Join(mountDir, "root")
