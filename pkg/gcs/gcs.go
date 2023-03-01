@@ -19,6 +19,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/storage"
+	"github.com/google/syzkaller/pkg/log"
 	"google.golang.org/api/iterator"
 )
 
@@ -104,6 +105,11 @@ func (client *Client) FileWriterExt(gcsFile, contentType, contentEncoding string
 		return nil, err
 	}
 	bkt := client.client.Bucket(bucket)
+	attrs, err := client.client.Bucket(bucket).Attrs(client.ctx)
+	if err != nil {
+		return nil, fmt.Errorf("LIZ_TESTING: attrs error: %v", err)
+	}
+	log.Logf(0, "LIZ_TESTING: The bucket exists and has attributes: %#v\n", attrs)
 	f := bkt.Object(filename)
 	w := f.NewWriter(client.ctx)
 	if contentType != "" {
