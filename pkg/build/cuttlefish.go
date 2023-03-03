@@ -129,23 +129,23 @@ func (c cuttlefish) build(params Params) (ImageDetails, error) {
 	// }
 	// log.Logf(0, "LIZ_TESTING: read compiler")
 
-	// if err := embedFiles(params, func(mountDir string) error {
-	// 	homeDir := filepath.Join(mountDir, "root")
+	if err := embedFiles(params, func(mountDir string) error {
+		// 	homeDir := filepath.Join(mountDir, "root")
 
-	// 	if err := osutil.CopyFile(bzImage, filepath.Join(homeDir, "bzImage")); err != nil {
-	// 		return err
-	// 	}
-	// 	if err := osutil.CopyFile(vmlinux, filepath.Join(homeDir, "vmlinux")); err != nil {
-	// 		return err
-	// 	}
-	// 	if err := osutil.CopyFile(initramfs, filepath.Join(homeDir, "initramfs.img")); err != nil {
-	// 		return err
-	// 	}
+		// 	if err := osutil.CopyFile(bzImage, filepath.Join(homeDir, "bzImage")); err != nil {
+		// 		return err
+		// 	}
+		// 	if err := osutil.CopyFile(vmlinux, filepath.Join(homeDir, "vmlinux")); err != nil {
+		// 		return err
+		// 	}
+		// 	if err := osutil.CopyFile(initramfs, filepath.Join(homeDir, "initramfs.img")); err != nil {
+		// 		return err
+		// 	}
 
-	// 	return nil
-	// }); err != nil {
-	// 	return details, err
-	// }
+		return nil
+	}); err != nil {
+		return details, err
+	}
 
 	// if err := osutil.CopyFile(vmlinux, filepath.Join(params.OutputDir, "obj", "vmlinux")); err != nil {
 	// 	return details, err
