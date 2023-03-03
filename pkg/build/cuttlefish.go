@@ -10,7 +10,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
-	"strings"
+	// "strings"
 	"time"
 
 	"github.com/google/syzkaller/pkg/log"
@@ -89,78 +89,78 @@ func (c cuttlefish) build(params Params) (ImageDetails, error) {
 		return details, fmt.Errorf("sysctl file is not supported for android cuttlefish images")
 	}
 
-	var config string
-	var err error
+	// var config string
+	// var err error
 	// Clean output directory if it exists.
 	// if err := osutil.RemoveAll(filepath.Join(params.KernelDir, "out")); err != nil {
 	// 	return details, fmt.Errorf("failed to clean before kernel build: %v", err)
 	// }
 	// Default to build.sh if compiler is not specified.
-	if params.Compiler == "bazel" {
-		// if err := c.runBazel(params.KernelDir); err != nil {
-		// 	return details, fmt.Errorf("failed to build kernel: %s", err)
-		// }
-		// Find the .config file; it is placed in a temporary output directory during the build.
-		cmd := osutil.Command("find", ".", "-wholename", "*virtual_device_x86_64_config/out_dir/.config")
-		cmd.Dir = params.KernelDir
-		configBytes, err := osutil.Run(time.Minute, cmd)
-		if err != nil {
-			return details, fmt.Errorf("failed to find build config: %v", err)
-		}
-		config = filepath.Join(params.KernelDir, strings.TrimSpace(string(configBytes)))
-	} else {
-		if err := c.runBuild(params.KernelDir, kernelConfig); err != nil {
-			return details, fmt.Errorf("failed to build kernel: %s", err)
-		}
-		if err := c.runBuild(params.KernelDir, moduleConfig); err != nil {
-			return details, fmt.Errorf("failed to build modules: %s", err)
-		}
-		config = filepath.Join(params.KernelDir, "out", "common", ".config")
-	}
+	// if params.Compiler == "bazel" {
+	// 	// if err := c.runBazel(params.KernelDir); err != nil {
+	// 	// 	return details, fmt.Errorf("failed to build kernel: %s", err)
+	// 	// }
+	// 	// Find the .config file; it is placed in a temporary output directory during the build.
+	// 	cmd := osutil.Command("find", ".", "-wholename", "*virtual_device_x86_64_config/out_dir/.config")
+	// 	cmd.Dir = params.KernelDir
+	// 	configBytes, err := osutil.Run(time.Minute, cmd)
+	// 	if err != nil {
+	// 		return details, fmt.Errorf("failed to find build config: %v", err)
+	// 	}
+	// 	// config = filepath.Join(params.KernelDir, strings.TrimSpace(string(configBytes)))
+	// } else {
+	// 	if err := c.runBuild(params.KernelDir, kernelConfig); err != nil {
+	// 		return details, fmt.Errorf("failed to build kernel: %s", err)
+	// 	}
+	// 	if err := c.runBuild(params.KernelDir, moduleConfig); err != nil {
+	// 		return details, fmt.Errorf("failed to build modules: %s", err)
+	// 	}
+	// 	// config = filepath.Join(params.KernelDir, "out", "common", ".config")
+	// }
 
-	buildDistDir := filepath.Join(params.KernelDir, "dist")
-	bzImage := filepath.Join(buildDistDir, "bzImage")
-	vmlinux := filepath.Join(buildDistDir, "vmlinux")
-	initramfs := filepath.Join(buildDistDir, "initramfs.img")
+	// buildDistDir := filepath.Join(params.KernelDir, "dist")
+	// bzImage := filepath.Join(buildDistDir, "bzImage")
+	// vmlinux := filepath.Join(buildDistDir, "vmlinux")
+	// initramfs := filepath.Join(buildDistDir, "initramfs.img")
 
-	details.CompilerID, err = c.readCompiler(filepath.Join(buildDistDir, "kernel-headers.tar.gz"))
-	if err != nil {
-		return details, err
-	}
-	log.Logf(0, "LIZ_TESTING: read compiler")
+	// details.CompilerID, err = c.readCompiler(filepath.Join(buildDistDir, "kernel-headers.tar.gz"))
+	// if err != nil {
+	// 	return details, err
+	// }
+	// log.Logf(0, "LIZ_TESTING: read compiler")
 
-	if err := embedFiles(params, func(mountDir string) error {
-		homeDir := filepath.Join(mountDir, "root")
+	// if err := embedFiles(params, func(mountDir string) error {
+	// 	homeDir := filepath.Join(mountDir, "root")
 
-		if err := osutil.CopyFile(bzImage, filepath.Join(homeDir, "bzImage")); err != nil {
-			return err
-		}
-		if err := osutil.CopyFile(vmlinux, filepath.Join(homeDir, "vmlinux")); err != nil {
-			return err
-		}
-		if err := osutil.CopyFile(initramfs, filepath.Join(homeDir, "initramfs.img")); err != nil {
-			return err
-		}
+	// 	if err := osutil.CopyFile(bzImage, filepath.Join(homeDir, "bzImage")); err != nil {
+	// 		return err
+	// 	}
+	// 	if err := osutil.CopyFile(vmlinux, filepath.Join(homeDir, "vmlinux")); err != nil {
+	// 		return err
+	// 	}
+	// 	if err := osutil.CopyFile(initramfs, filepath.Join(homeDir, "initramfs.img")); err != nil {
+	// 		return err
+	// 	}
 
-		return nil
-	}); err != nil {
-		return details, err
-	}
+	// 	return nil
+	// }); err != nil {
+	// 	return details, err
+	// }
 
-	if err := osutil.CopyFile(vmlinux, filepath.Join(params.OutputDir, "obj", "vmlinux")); err != nil {
-		return details, err
-	}
-	if err := osutil.CopyFile(initramfs, filepath.Join(params.OutputDir, "obj", "initrd")); err != nil {
-		return details, err
-	}
-	if err := osutil.CopyFile(config, filepath.Join(params.OutputDir, "kernel.config")); err != nil {
-		return details, err
-	}
+	// if err := osutil.CopyFile(vmlinux, filepath.Join(params.OutputDir, "obj", "vmlinux")); err != nil {
+	// 	return details, err
+	// }
+	// if err := osutil.CopyFile(initramfs, filepath.Join(params.OutputDir, "obj", "initrd")); err != nil {
+	// 	return details, err
+	// }
+	// if err := osutil.CopyFile(config, filepath.Join(params.OutputDir, "kernel.config")); err != nil {
+	// 	return details, err
+	// }
 
-	details.Signature, err = elfBinarySignature(vmlinux, params.Tracer)
-	if err != nil {
-		return details, fmt.Errorf("failed to generate signature: %s", err)
-	}
+	// details.Signature, err = elfBinarySignature(vmlinux, params.Tracer)
+	// if err != nil {
+	// 	return details, fmt.Errorf("failed to generate signature: %s", err)
+	// }
 
 	return details, nil
 }
