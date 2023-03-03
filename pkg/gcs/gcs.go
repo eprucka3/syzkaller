@@ -101,6 +101,7 @@ func (client *Client) UploadFile(localFile, gcsFile, contentType, contentEncodin
 
 func (client *Client) FileWriterExt(gcsFile, contentType, contentEncoding string) (io.WriteCloser, error) {
 	bucket, filename, err := split(gcsFile)
+	log.Logf(0, "LIZ_TESTING: bucket: %v, filename: %v", bucket, filename)
 	if err != nil {
 		return nil, err
 	}
