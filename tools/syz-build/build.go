@@ -8,24 +8,22 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"runtime"
 
 	"github.com/google/syzkaller/pkg/build"
 	"github.com/google/syzkaller/pkg/debugtracer"
+	"github.com/google/syzkaller/pkg/mgrconfig"
 	"github.com/google/syzkaller/pkg/tool"
 )
 
 var (
-	flagOS            = flag.String("os", runtime.GOOS, "OS to build")
-	flagArch          = flag.String("arch", runtime.GOARCH, "arch to build")
-	flagVM            = flag.String("vm", "gce", "VM type to build")
-	flagKernelSrc     = flag.String("kernel_src", "", "path to kernel checkout")
 	flagCompiler      = flag.String("compiler", "", "non-defult compiler")
 	flagLinker        = flag.String("linker", "", "non-default linker")
 	flagKernelConfig  = flag.String("config", "", "kernel config file")
 	flagKernelSysctl  = flag.String("sysctl", "", "kernel sysctl file")
 	flagKernelCmdline = flag.String("cmdline", "", "kernel cmdline file")
 	flagUserspace     = flag.String("userspace", "", "path to userspace for build")
+	flagKernelSrc     = flag.String("kernel_src", "", "path to kernel checkout")
+	flagMgrConfig     = flag.String("mgrconfig", "", "manager config")
 	flagTrace         = flag.Bool("trace", false, "trace build process and save debug artefacts")
 )
 
@@ -35,14 +33,24 @@ func main() {
 		fmt.Printf("not running under root, image build may fail\n")
 	}
 	os.Setenv("SYZ_DISABLE_SANDBOXING", "yes")
-	kernelConfig, err := os.ReadFile(*flagKernelConfig)
+	kernelConfig := []byte{}
+	var err error
+	if *flagKernelConfig != "" {
+		kernelConfig, err = os.ReadFile(*flagKernelConfig)
+		if err != nil {
+			tool.Fail(err)
+		}
+	}
+
+	cfg, err := mgrconfig.LoadPartialFile(*flagMgrConfig)
 	if err != nil {
 		tool.Fail(err)
 	}
+
 	params := build.Params{
-		TargetOS:     *flagOS,
-		TargetArch:   *flagArch,
-		VMType:       *flagVM,
+		TargetOS:     cfg.TargetOS,
+		TargetArch:   cfg.TargetVMArch,
+		VMType:       cfg.Type,
 		KernelDir:    *flagKernelSrc,
 		OutputDir:    ".",
 		Compiler:     *flagCompiler,
@@ -53,6 +61,7 @@ func main() {
 		SysctlFile:   *flagKernelSysctl,
 		Config:       kernelConfig,
 		Tracer:       &debugtracer.NullTracer{},
+		Build:        cfg.Build,
 	}
 	if *flagTrace {
 		params.Tracer = &debugtracer.GenericTracer{
