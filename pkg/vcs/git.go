@@ -83,12 +83,6 @@ func (git *git) Poll(repo, branch string) (*Commit, error) {
 			return nil, err
 		}
 	}
-	log.Logf(0, "LIZ_TESTING: In Poll")
-	out, err := osutil.RunCmd(time.Minute, "", "git", "config", "--list")
-	if err != nil {
-		return nil, fmt.Errorf("FAILED")
-	}
-	log.Logf(0, "LIZ_TESTING: out: %v", string(out))
 	if _, err := git.git("fetch", "--force"); err != nil {
 		// Something else is wrong, re-clone.
 		if err := git.clone(repo, branch); err != nil {
@@ -116,13 +110,7 @@ func (git *git) CheckoutBranch(repo, branch string) (*Commit, error) {
 	git.git("remote", "rm", "origin")
 	git.git("remote", "add", "origin", repo)
 	git.git("remote", "add", repoHash, repo)
-	log.Logf(0, "LIZ_TESTING: In Poll")
-	out, err := osutil.RunCmd(time.Minute, "", "git", "config", "--list")
-	if err != nil {
-		return nil, fmt.Errorf("FAILED")
-	}
-	log.Logf(0, "LIZ_TESTING: out: %v", string(out))
-	_, err = git.git("fetch", "--force", repoHash, branch)
+	_, err := git.git("fetch", "--force", repoHash, branch)
 	if err != nil {
 		return nil, err
 	}
@@ -149,13 +137,7 @@ func (git *git) fetchRemote(repo string) error {
 	repoHash := hash.String([]byte(repo))
 	// Ignore error as we can double add the same remote and that will fail.
 	git.git("remote", "add", repoHash, repo)
-	log.Logf(0, "LIZ_TESTING: In Poll")
-	out, err := osutil.RunCmd(time.Minute, "", "git", "config", "--list")
-	if err != nil {
-		return fmt.Errorf("FAILED")
-	}
-	log.Logf(0, "LIZ_TESTING: out: %v", string(out))
-	_, err = git.git("fetch", "--force", "--tags", repoHash)
+	_, err := git.git("fetch", "--force", "--tags", repoHash)
 	return err
 }
 
@@ -183,12 +165,6 @@ func (git *git) clone(repo, branch string) error {
 	if _, err := git.git("remote", "add", "origin", repo); err != nil {
 		return err
 	}
-	log.Logf(0, "LIZ_TESTING: In Poll")
-	out, err := osutil.RunCmd(time.Minute, "", "git", "config", "--list")
-	if err != nil {
-		return fmt.Errorf("FAILED")
-	}
-	log.Logf(0, "LIZ_TESTING: out: %v", string(out))
 	if _, err := git.git("fetch", "origin", branch); err != nil {
 		return err
 	}
