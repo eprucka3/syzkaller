@@ -427,6 +427,7 @@ func (git *git) fetchCommits(since, base, user, domain string, greps []string, f
 }
 
 func (git *git) git(args ...string) ([]byte, error) {
+	log.Logf(0, "LIZ_TESTING: git %v", args)
 	cmd := osutil.Command("git", args...)
 	cmd.Dir = git.dir
 	cmd.Env = filterEnv()
