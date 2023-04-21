@@ -16,6 +16,7 @@ import (
 	"path/filepath"
 	"time"
 
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 	"github.com/google/syzkaller/pkg/report"
 	"github.com/google/syzkaller/vm/gce"
@@ -75,6 +76,7 @@ func (pool *Pool) Create(workdir string, index int) (vmimpl.Instance, error) {
 		debug:   pool.env.Debug,
 		gceInst: gceInst,
 	}
+	log.Logf(0, "LIZ in syzkaller test")
 
 	// Start a Cuttlefish device on the GCE instance.
 	if err := inst.runOnHost(10*time.Minute,
