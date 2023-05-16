@@ -17,7 +17,7 @@ import (
 	"github.com/google/syzkaller/sys/targets"
 )
 
-func (mgr *Manager) createCoverageFilter() ([]byte, map[uint32]uint32, error) {
+func (mgr *Manager) createCoverageFilter() (map[uint32]uint32, map[uint32]uint32, error) {
 	if len(mgr.cfg.CovFilter.Functions)+len(mgr.cfg.CovFilter.Files)+len(mgr.cfg.CovFilter.RawPCs) == 0 {
 		return nil, nil, nil
 	}
@@ -52,7 +52,11 @@ func (mgr *Manager) createCoverageFilter() ([]byte, map[uint32]uint32, error) {
 	if !mgr.cfg.SysTarget.ExecutorUsesShmem {
 		return nil, nil, fmt.Errorf("coverage filter is only supported for targets that use shmem")
 	}
-	bitmap := createCoverageBitmap(mgr.cfg.SysTarget, pcs)
+	// Copy pcs into bitmapPCs.
+	bitmapPCs := make(map[uint32]uint32)
+	for pc, val := range pcs {
+		bitmapPCs[pc] = val
+	}
 	// After finish writing down bitmap file, for accurate filtered coverage,
 	// pcs from CMPs should be deleted.
 	for _, sym := range rg.Symbols {
@@ -60,7 +64,7 @@ func (mgr *Manager) createCoverageFilter() ([]byte, map[uint32]uint32, error) {
 			delete(pcs, uint32(pc))
 		}
 	}
-	return bitmap, pcs, nil
+	return bitmapPCs, pcs, nil
 }
 
 func covFilterAddFilter(pcs map[uint32]uint32, filters []string, foreach func(func(*backend.ObjectUnit))) error {
