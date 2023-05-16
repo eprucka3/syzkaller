@@ -38,6 +38,13 @@ func TestNilModules(t *testing.T) {
 	testCov := pcs
 	goalOut := pcs
 
+	bitmapPCs := map[uint32]uint32{ // E: expected ';', found ']'
+		0x00010011: 1,
+		0x00020FFF: 1,
+		0x00030000: 1,
+		0x00040000: 1,
+	}
+
 	// Concatenate PCs with a hash to reflect executor signal creation.
 	signalsRaw := []uint32{0x000, 0xAAA, 0xBBB, 0xCCC}
 	for idx := range signalsRaw {
@@ -73,6 +80,12 @@ func TestNilModules(t *testing.T) {
 			failMsg := fmt.Errorf("fuzzer %v.\nExpected: 0x%x.\nReturned: 0x%x",
 				name, signals, testSignals.Deserialize())
 			t.Fatalf("failed in signal decanonicalization. %v", failMsg)
+		}
+		instPCs := fuzzer.instModules.DecanonicalizeFilter(bitmapPCs)
+		if !reflect.DeepEqual(instPCs, bitmapPCs) {
+			failMsg := fmt.Errorf("fuzzer %v.\nExpected: 0x%x.\nReturned: 0x%x",
+				name, bitmapPCs, instPCs)
+			t.Fatalf("failed in filter decanonicalization. %v", failMsg)
 		}
 	}
 }
@@ -110,9 +123,18 @@ func TestModules(t *testing.T) {
 
 	testCov := make(map[string][]uint32)
 	covOut := make(map[string][]uint32)
+	bitmapOut := make(map[string]map[uint32]uint32)
 
 	pcs := []uint32{0x00010011, 0x00015F00, 0x00020FFF, 0x00025000, 0x00030000,
 		0x00035000, 0x00040000, 0x00045000, 0x00050000, 0x00055000}
+
+	bitmapPCs := map[uint32]uint32{ // E: expected ';', found ']'
+		0x00010011: 1,
+		0x00020FFF: 1,
+		0x00030000: 1,
+		0x00040000: 1,
+	}
+	bitmapOut["f1"] = bitmapPCs
 
 	// f1 is the "canonical" fuzzer as it is first one instantiated.
 	// This means that all coverage output should be the same as the inputs.
@@ -124,6 +146,12 @@ func TestModules(t *testing.T) {
 	testCov["f2"] = pcs
 	covOut["f2"] = []uint32{0x00010011, 0x00015F00, 0x00040FFF, 0x00025000, 0x00045000,
 		0x0004a000, 0x00020000, 0x00030000, 0x0003b000, 0x00055000}
+	bitmapOut["f2"] = map[uint32]uint32{
+		0x00010011: 1,
+		0x00040FFF: 1,
+		0x00045000: 1,
+		0x00020000: 1,
+	}
 
 	// Concatenate PCs with a hash to reflect executor signal creation.
 	signalsRaw := []uint32{0x000, 0xAAA, 0xBBB, 0xCCC, 0xDDD, 0xFFF, 0x111, 0x222, 0x333, 0x444}
@@ -173,6 +201,12 @@ func TestModules(t *testing.T) {
 			failMsg := fmt.Errorf("fuzzer %v.\nExpected: 0x%x.\nReturned: 0x%x",
 				name, signals, testSignals[name].Deserialize())
 			t.Fatalf("failed in signal decanonicalization. %v", failMsg)
+		}
+		instPCs := fuzzer.instModules.DecanonicalizeFilter(bitmapPCs)
+		if !reflect.DeepEqual(instPCs, bitmapOut[name]) {
+			failMsg := fmt.Errorf("fuzzer %v.\nExpected: 0x%x.\nReturned: 0x%x",
+				name, bitmapOut[name], instPCs)
+			t.Fatalf("failed in filter decanonicalization. %v", failMsg)
 		}
 	}
 }

@@ -102,6 +102,32 @@ func (ci *CanonicalizerInstance) Decanonicalize(cov []uint32, sign signal.Serial
 	convertSignals(ci.canonical.moduleKeys, ci.canonicalToInstMap, sign)
 }
 
+func (ci *CanonicalizerInstance) DecanonicalizeFilter(pcs map[uint32]uint32) map[uint32]uint32 {
+	// Skip conversion if modules or filtering are not used.
+	if len(ci.canonical.moduleKeys) == 0 || len(pcs) == 0 {
+		return pcs
+	}
+
+	// Deserialize PCs for conversion.
+	cov := make([]uint32, len(pcs))
+	vals := make([]uint32, len(pcs))
+	idx := 0
+	for pc, val := range pcs {
+		cov[idx] = pc
+		vals[idx] = val
+		idx++
+	}
+	convertModulePCs(ci.canonical.moduleKeys, ci.canonicalToInstMap, cov)
+
+	// Recreate cover filter map.
+	instPCs := make(map[uint32]uint32)
+	for idx, pc := range cov {
+		instPCs[pc] = vals[idx]
+	}
+	return instPCs
+
+}
+
 // Store sorted list of addresses. Used to binary search when converting PCs.
 func setModuleKeys(moduleKeys []uint32, modules []host.KernelModule) {
 	for idx, module := range modules {
