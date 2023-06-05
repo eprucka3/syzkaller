@@ -78,7 +78,7 @@ func (pool *Pool) Create(workdir string, index int) (vmimpl.Instance, error) {
 
 	// Start a Cuttlefish device on the GCE instance.
 	if err := inst.runOnHost(10*time.Minute,
-		fmt.Sprintf("./bin/launch_cvd -daemon -kernel_path=./bzImage -initramfs_path=./initramfs.img"+
+		fmt.Sprintf("./bin/launch_cvd -daemon -kernel_path=./bzImage -initramfs_path=./initramfs.img -cpus=4"+
 			" --noenable_sandbox -report_anonymous_usage_stats=n --memory_mb=8192")); err != nil {
 		return nil, fmt.Errorf("failed to start cuttlefish: %s", err)
 	}
