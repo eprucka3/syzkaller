@@ -65,6 +65,10 @@ func DetectSupportedSyscalls(target *prog.Target, sandbox string, enabled map[*p
 			}
 		}
 	}
+	for call := range supported {
+		log.Logf(1, "LIZ_CALL: %v", call)
+	}
+
 	return supported, unsupported, nil
 }
 
