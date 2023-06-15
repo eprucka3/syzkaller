@@ -2261,7 +2261,7 @@ static long syz_btf_id_by_name(volatile long a0)
 static long syz_memcpy_off(volatile long a0, volatile long a1, volatile long a2, volatile long a3, volatile long a4)
 {
 	// C:       syz_memcpy_off(void* dest, uint32 dest_off, void* src, uint32 src_off, size_t n)
-
+	debug("LIZ_START");
 	// Cast to original
 	char* dest = (char*)a0;
 	uint32 dest_off = (uint32)a1;
@@ -2269,7 +2269,10 @@ static long syz_memcpy_off(volatile long a0, volatile long a1, volatile long a2,
 	uint32 src_off = (uint32)a3;
 	size_t n = (size_t)a4;
 
-	return (long)memcpy(dest + dest_off, src + src_off, n);
+	long out = (long)memcpy(dest + dest_off, src + src_off, n);
+
+	debug("LIZ_END");
+	return out;
 }
 #endif
 
@@ -2954,6 +2957,7 @@ error:
 // syz_read_part_table(size len[img], img ptr[in, compressed_image])
 static long syz_read_part_table(volatile unsigned long size, volatile long image)
 {
+	debug("LIZ_START");
 	unsigned char* data = (unsigned char*)image;
 	int err = 0, res = -1, loopfd = -1;
 	char loopname[64];
@@ -2993,6 +2997,7 @@ error_clear_loop:
 		ioctl(loopfd, LOOP_CLR_FD, 0);
 	close(loopfd);
 	errno = err;
+	debug("LIZ_END: %d", res);
 	return res;
 }
 #endif
@@ -5538,6 +5543,7 @@ static long syz_clone(volatile long flags, volatile long stack, volatile long st
 #define MAX_CLONE_ARGS_BYTES 256
 static long syz_clone3(volatile long a0, volatile long a1)
 {
+	debug("LIZ_START");
 	unsigned long copy_size = a1;
 	if (copy_size < sizeof(uint64) || copy_size > MAX_CLONE_ARGS_BYTES)
 		return -1;
@@ -5551,7 +5557,9 @@ static long syz_clone3(volatile long a0, volatile long a1)
 #if SYZ_EXECUTOR || SYZ_HANDLE_SEGV
 	__atomic_store_n(&clone_ongoing, 1, __ATOMIC_RELAXED);
 #endif
-	return handle_clone_ret((long)syscall(__NR_clone3, &clone_args, copy_size));
+	long out = handle_clone_ret((long)syscall(__NR_clone3, &clone_args, copy_size));
+	debug("LIZ_END: %ld", out);
+	return out;
 }
 
 #endif
