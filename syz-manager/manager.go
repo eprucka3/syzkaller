@@ -91,7 +91,6 @@ type Manager struct {
 
 	modules            []host.KernelModule
 	coverFilter        map[uint32]uint32
-	coverFilterBitmap  map[uint32]uint32
 	modulesInitialized bool
 
 	assetStorage *asset.Storage
@@ -1334,13 +1333,13 @@ func (mgr *Manager) fuzzerConnect(modules []host.KernelModule) (
 	if !mgr.modulesInitialized {
 		var err error
 		mgr.modules = modules
-		mgr.coverFilterBitmap, mgr.coverFilter, err = mgr.createCoverageFilter()
+		mgr.coverFilter, err = mgr.createCoverageFilter()
 		if err != nil {
 			log.Fatalf("failed to create coverage filter: %v", err)
 		}
 		mgr.modulesInitialized = true
 	}
-	return corpus, frames, mgr.coverFilter, mgr.coverFilterBitmap, nil
+	return corpus, frames, mgr.coverFilter, nil
 }
 
 func (mgr *Manager) machineChecked(a *rpctype.CheckArgs, enabledSyscalls map[*prog.Syscall]bool) {

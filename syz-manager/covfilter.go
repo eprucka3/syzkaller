@@ -17,57 +17,54 @@ import (
 	"github.com/google/syzkaller/sys/targets"
 )
 
-func (mgr *Manager) createCoverageFilter() (map[uint32]uint32, map[uint32]uint32, error) {
+type ObjectUnit struct {
+	Name      string
+	Callbacks []uint64
+}
+
+func (mgr *Manager) createCoverageFilter() (map[uint32]uint32, error) {
 	if len(mgr.cfg.CovFilter.Functions)+len(mgr.cfg.CovFilter.Files)+len(mgr.cfg.CovFilter.RawPCs) == 0 {
-		return nil, nil, nil
+		return nil, nil
 	}
 	// Always initialize ReportGenerator because RPCServer.NewInput will need it to filter coverage.
 	rg, err := getReportGenerator(mgr.cfg, mgr.modules)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	pcs := make(map[uint32]uint32)
-	foreachSymbol := func(apply func(*backend.ObjectUnit)) {
+	foreachSymbolPC := func(apply func(*ObjectUnit)) {
 		for _, sym := range rg.Symbols {
-			apply(&sym.ObjectUnit)
+			apply(&ObjectUnit{
+				Name:      sym.ObjectUnit.Name,
+				Callbacks: sym.ObjectUnit.PCs})
 		}
 	}
-	if err := covFilterAddFilter(pcs, mgr.cfg.CovFilter.Functions, foreachSymbol); err != nil {
-		return nil, nil, err
+	if err := covFilterAddFilter(pcs, mgr.cfg.CovFilter.Functions, foreachSymbolPC); err != nil {
+		return nil, err
 	}
-	foreachUnit := func(apply func(*backend.ObjectUnit)) {
+	foreachUnitPC := func(apply func(*ObjectUnit)) {
 		for _, unit := range rg.Units {
-			apply(&unit.ObjectUnit)
+			apply(&ObjectUnit{
+				Name:      unit.ObjectUnit.Name,
+				Callbacks: unit.ObjectUnit.PCs})
 		}
 	}
-	if err := covFilterAddFilter(pcs, mgr.cfg.CovFilter.Files, foreachUnit); err != nil {
-		return nil, nil, err
+	if err := covFilterAddFilter(pcs, mgr.cfg.CovFilter.Files, foreachUnitPC); err != nil {
+		return nil, err
 	}
 	if err := covFilterAddRawPCs(pcs, mgr.cfg.CovFilter.RawPCs); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if len(pcs) == 0 {
-		return nil, nil, nil
+		return nil, nil
 	}
 	if !mgr.cfg.SysTarget.ExecutorUsesShmem {
-		return nil, nil, fmt.Errorf("coverage filter is only supported for targets that use shmem")
+		return nil, fmt.Errorf("coverage filter is only supported for targets that use shmem")
 	}
-	// Copy pcs into bitmapPCs.
-	bitmapPCs := make(map[uint32]uint32)
-	for pc, val := range pcs {
-		bitmapPCs[pc] = val
-	}
-	// After finish writing down bitmap file, for accurate filtered coverage,
-	// pcs from CMPs should be deleted.
-	for _, sym := range rg.Symbols {
-		for _, pc := range sym.CMPs {
-			delete(pcs, uint32(pc))
-		}
-	}
-	return bitmapPCs, pcs, nil
+	return pcs, nil
 }
 
-func covFilterAddFilter(pcs map[uint32]uint32, filters []string, foreach func(func(*backend.ObjectUnit))) error {
+func covFilterAddFilter(pcs map[uint32]uint32, filters []string, foreach func(func(*ObjectUnit))) error {
 	res, err := compileRegexps(filters)
 	if err != nil {
 		return err
@@ -78,10 +75,7 @@ func covFilterAddFilter(pcs map[uint32]uint32, filters []string, foreach func(fu
 			if re.MatchString(unit.Name) {
 				// We add both coverage points and comparison interception points
 				// because executor filters comparisons as well.
-				for _, pc := range unit.PCs {
-					pcs[uint32(pc)] = 1
-				}
-				for _, pc := range unit.CMPs {
+				for _, pc := range unit.Callbacks {
 					pcs[uint32(pc)] = 1
 				}
 				used[re] = append(used[re], unit.Name)
@@ -134,7 +128,41 @@ func covFilterAddRawPCs(pcs map[uint32]uint32, rawPCsFiles []string) error {
 	return nil
 }
 
-func createCoverageBitmap(target *targets.Target, pcs map[uint32]uint32) []byte {
+func createBitmapPCs(pcs map[uint32]uint32) (map[uint32]uint32, error) {
+	bitmapPCs := make(map[uint32]uint32)
+	for pc, val := range pcs {
+		bitmapPCs[pc] = val
+	}
+	// Add pcs from CMPs. These are not included in the manager for accurate
+	// filtered coverage.
+	foreachSymbolCMP := func(apply func(*ObjectUnit)) {
+		for _, sym := range rg.Symbols {
+			apply(&ObjectUnit{
+				Name:      sym.ObjectUnit.Name,
+				Callbacks: sym.ObjectUnit.CMPs})
+		}
+	}
+	if err := covFilterAddFilter(bitmapPCs, mgr.cfg.CovFilter.Functions, foreachSymbolCMP); err != nil {
+		return nil, err
+	}
+	foreachUnitCMP := func(apply func(*ObjectUnit)) {
+		for _, unit := range rg.Units {
+			apply(&ObjectUnit{
+				Name:      unit.ObjectUnit.Name,
+				Callbacks: unit.ObjectUnit.CMPs})
+		}
+	}
+	if err := covFilterAddFilter(bitmapPCs, mgr.cfg.CovFilter.Functions, foreachSymbolCMP); err != nil {
+		return nil, err
+	}
+	return bitmapPCs, nil
+}
+
+func createCoverageBitmap(target *targets.Target, pcs map[uint32]uint32) ([]byte, error) {
+	pcs, err := createBitmapPCs(pcs)
+	if err != nil {
+		return nil, err
+	}
 	start, size := coverageFilterRegion(pcs)
 	log.Logf(0, "coverage filter from 0x%x to 0x%x, size 0x%x, pcs %v", start, start+size, size, len(pcs))
 	// The file starts with two uint32: covFilterStart and covFilterSize,
@@ -155,7 +183,7 @@ func createCoverageBitmap(target *targets.Target, pcs map[uint32]uint32) []byte 
 		pc = (pc - start) >> 4
 		bitmap[pc/8] |= (1 << (pc % 8))
 	}
-	return data
+	return data, nil
 }
 
 func coverageFilterRegion(pcs map[uint32]uint32) (uint32, uint32) {
