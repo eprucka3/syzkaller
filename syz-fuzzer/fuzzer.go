@@ -159,7 +159,7 @@ func main() {
 	)
 	defer tool.Init()()
 	outputType := parseOutputType(*flagOutput)
-	log.Logf(0, "fuzzer started")
+	log.Logf(0, "LIZ fuzzer started")
 
 	target, err := prog.GetTarget(*flagOS, *flagArch)
 	if err != nil {

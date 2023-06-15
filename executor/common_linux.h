@@ -2188,6 +2188,7 @@ static char* read_btf_vmlinux()
 // opening the vmlinux file or the name is not found in vmlinux.
 static long syz_btf_id_by_name(volatile long a0)
 {
+	debug("LIZ_HERE");
 	// syzlang: syz_btf_id_by_name(name ptr[in, string]) btf_id
 	// C:		syz_btf_id_by_name(char* name)
 	char* target = (char*)a0;
@@ -2249,7 +2250,7 @@ static long syz_btf_id_by_name(volatile long a0)
 		bytes_parsed += sizeof(struct btf_type) + skip;
 		idx++;
 	}
-
+	debug("LIZ_CALL END");
 	return -1;
 }
 
@@ -2390,6 +2391,7 @@ static long syz_extract_tcp_res(volatile long a0, volatile long a1, volatile lon
 
 static long syz_open_dev(volatile long a0, volatile long a1, volatile long a2)
 {
+	debug("LIZ_START");
 	if (a0 == 0xc || a0 == 0xb) {
 		// syz_open_dev$char(dev const[0xc], major intptr, minor intptr) fd
 		// syz_open_dev$block(dev const[0xb], major intptr, minor intptr) fd
@@ -2408,6 +2410,7 @@ static long syz_open_dev(volatile long a0, volatile long a1, volatile long a2)
 		}
 		return open(buf, a2, 0);
 	}
+	debug("LIZ_END");
 }
 #endif
 

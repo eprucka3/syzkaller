@@ -529,6 +529,7 @@ func (inst *instance) Run(timeout time.Duration, stop <-chan bool, command strin
 		tty.Close()
 		return nil, nil, err
 	}
+	command = fmt.Sprintf("%v %v", "strace -ff -o strace_log.txt", command)
 	if inst.debug {
 		log.Logf(0, "starting: adb shell %v", command)
 	}
