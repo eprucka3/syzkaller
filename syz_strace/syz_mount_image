@@ -1,0 +1,44 @@
+set_robust_list(0x555555ba96e0, 24)     = 0
+chdir("./0")                            = 0
+prctl(PR_SET_PDEATHSIG, SIGKILL)        = 0
+setpgid(0, 0)                           = 0
+symlinkat("/syzcgroup/unified/syz0", AT_FDCWD, "./cgroup") = 0
+symlinkat("/syzcgroup/cpu/syz0", AT_FDCWD, "./cgroup.cpu") = 0
+symlinkat("/syzcgroup/net/syz0", AT_FDCWD, "./cgroup.net") = 0
+openat(AT_FDCWD, "/proc/self/oom_score_adj", O_WRONLY|O_CLOEXEC) = 5
+write(5, "1000", 4)                     = 4
+close(5)                                = 0
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, 0x7ffe1760c660, 1000)         = -1 EAGAIN (Try again)
+symlinkat("/dev/binderfs", AT_FDCWD, "./binderfs") = 0
+close(249)                              = 0
+close(248)                              = 0
+close(4)                                = 0
+futex(0x73d9f776cf8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x73d9f776cf88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [422ms] -> syz_mount_image$tm"..., 36) = 36
+write(2, "0x20000040", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x20000080", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x200000c0", 10)              = 10
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_mount_image", 25) = 25
+mkdirat(AT_FDCWD, "./file0", 0777)      = 0
+--- SIGSEGV {si_signo=SIGSEGV, si_code=SEGV_MAPERR, si_addr=NULL} ---
+write(2, "SIGSEGV on (nil), skipping\n", 27) = 27
+write(2, "#0 [427ms] <- syz_mount_image$tm"..., 54) = 54
+write(2, " errno=14", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x73d9f776cf8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+exit_group(0)                           = ?
++++ exited with 0 +++

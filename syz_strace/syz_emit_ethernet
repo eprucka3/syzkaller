@@ -1,0 +1,50 @@
+set_robust_list(0x55555743d6e0, 24)     = 0
+chdir("./0")                            = 0
+prctl(PR_SET_PDEATHSIG, SIGKILL)        = 0
+setpgid(0, 0)                           = 0
+symlinkat("/syzcgroup/unified/syz0", AT_FDCWD, "./cgroup") = 0
+symlinkat("/syzcgroup/cpu/syz0", AT_FDCWD, "./cgroup.cpu") = 0
+symlinkat("/syzcgroup/net/syz0", AT_FDCWD, "./cgroup.net") = 0
+openat(AT_FDCWD, "/proc/self/oom_score_adj", O_WRONLY|O_CLOEXEC) = 5
+write(5, "1000", 4)                     = 4
+close(5)                                = 0
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, 0x7ffde2ddd420, 1000)         = -1 EAGAIN (Try again)
+symlinkat("/dev/binderfs", AT_FDCWD, "./binderfs") = 0
+close(249)                              = 0
+close(248)                              = 0
+close(4)                                = 0
+futex(0x76a2ea02ef8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x76a2ea02ef88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [480ms] -> syz_emit_ethernet(", 32) = 32
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_emit_ethernet", 27) = 27
+write(200, NULL, 0)                     = -1 EINVAL (Invalid argument)
+write(2, "LIZ_END syz_emit_ethernet", 25) = 25
+write(2, "#0 [480ms] <- syz_emit_ethernet="..., 50) = 50
+write(2, " errno=22", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x76a2ea02ef8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x76a2ea02ef88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [481ms] -> syz_emit_ethernet(", 32) = 32
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_emit_ethernet", 27) = 27
+write(200, NULL, 0)                     = -1 EINVAL (Invalid argument)
+write(2, "LIZ_END syz_emit_ethernet", 25) = 25
+write(2, "#0 [482ms] <- syz_emit_ethernet="..., 50) = 50
+write(2, " errno=22", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x76a2ea02ef8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+exit_group(0)                           = ?
++++ exited with 0 +++

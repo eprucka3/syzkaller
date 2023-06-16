@@ -1,0 +1,148 @@
+set_robust_list(0x55555645c6e0, 24)     = 0
+chdir("./0")                            = 0
+prctl(PR_SET_PDEATHSIG, SIGKILL)        = 0
+setpgid(0, 0)                           = 0
+symlinkat("/syzcgroup/unified/syz0", AT_FDCWD, "./cgroup") = 0
+symlinkat("/syzcgroup/cpu/syz0", AT_FDCWD, "./cgroup.cpu") = 0
+symlinkat("/syzcgroup/net/syz0", AT_FDCWD, "./cgroup.net") = 0
+openat(AT_FDCWD, "/proc/self/oom_score_adj", O_WRONLY|O_CLOEXEC) = 5
+write(5, "1000", 4)                     = 4
+close(5)                                = 0
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, 0x7ffd46d492b0, 1000)         = -1 EAGAIN (Try again)
+symlinkat("/dev/binderfs", AT_FDCWD, "./binderfs") = 0
+close(249)                              = 0
+close(248)                              = 0
+close(4)                                = 0
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [414ms] -> mkdirat(", 22)  = 22
+write(2, "0xffffffffffffff9c", 18)      = 18
+write(2, ", ", 2)                       = 2
+write(2, "0x20002040", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+mkdirat(AT_FDCWD, "./file0", 000)       = 0
+write(2, "#0 [415ms] <- mkdirat=0x0", 25) = 25
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [416ms] -> openat$fuse(", 26) = 26
+write(2, "0xffffffffffffff9c", 18)      = 18
+write(2, ", ", 2)                       = 2
+write(2, "0x20002080", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x2", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+openat(AT_FDCWD, "/dev/fuse", O_RDWR)   = 4
+write(2, "#0 [418ms] <- openat$fuse=0x4", 29) = 29
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [418ms] -> mount$fuse(", 25) = 25
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x200020c0", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x20002100", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x20002140", 10)              = 10
+write(2, ")\n", 2)                      = 2
+mount(NULL, "./file0", "fuse", 0, "fd=0x0000000000000004,rootmode=0"...) = -1 ENOSPC (No space left on device)
+write(2, "#0 [423ms] <- mount$fuse=0xfffff"..., 43) = 43
+write(2, " errno=28", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [428ms] -> read$FUSE(", 24) = 24
+write(2, "0x4", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x200021c0", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x2020", 6)                   = 6
+write(2, ")\n", 2)                      = 2
+read(4, 0x200021c0, 8224)               = -1 ENODEV (No such device)
+write(2, "#0 [429ms] <- read$FUSE=0xffffff"..., 42) = 42
+write(2, " errno=19", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [430ms] -> write$FUSE_INIT(", 30) = 30
+write(2, "0x4", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x20004200", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x50", 4)                     = 4
+write(2, ")\n", 2)                      = 2
+write(4, "P\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\7\0\0\0&\0\0\0\0\0\0\0\0\0\0\0"..., 80) = -1 EINVAL (Invalid argument)
+write(2, "#0 [432ms] <- write$FUSE_INIT=0x"..., 48) = 48
+write(2, " errno=22", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [432ms] -> openat$dir(", 25) = 25
+write(2, "0xffffffffffffff9c", 18)      = 18
+write(2, ", ", 2)                       = 2
+write(2, "0x20004280", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+openat(AT_FDCWD, "./file0", O_RDONLY)   = 5
+write(2, "#0 [434ms] <- openat$dir=0x5", 28) = 28
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [434ms] -> syz_fuse_handle_re"..., 34) = 34
+write(2, "0x4", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x200042c0", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x2000", 6)                   = 6
+write(2, ", ", 2)                       = 2
+write(2, "0x200062c0", 10)              = 10
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_fuse_handle_req", 29) = 29
+read(4, 0x200042c0, 8192)               = -1 ENODEV (No such device)
+write(2, "syz_fuse_handle_req > read faile"..., 38) = 38
+write(2, "#0 [436ms] <- syz_fuse_handle_re"..., 52) = 52
+write(2, " errno=19", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [438ms] -> getdents64(", 25) = 25
+write(2, "0x5", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x20006380", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x400", 5)                    = 5
+write(2, ")\n", 2)                      = 2
+getdents64(5, /* 2 entries */, 1024)    = 48
+write(2, "#0 [439ms] <- getdents64=0x30", 29) = 29
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7e655bb82f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [440ms] -> syz_fuse_handle_re"..., 34) = 34
+write(2, "0x4", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x20006780", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x2000", 6)                   = 6
+write(2, ", ", 2)                       = 2
+write(2, "0x20008780", 10)              = 10
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_fuse_handle_req", 29) = 29
+read(4, 0x20006780, 8192)               = -1 ENODEV (No such device)
+write(2, "syz_fuse_handle_req > read faile"..., 38) = 38
+write(2, "#0 [442ms] <- syz_fuse_handle_re"..., 52) = 52
+write(2, " errno=19", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x7e655bb82f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+exit_group(0)                           = ?
++++ exited with 0 +++

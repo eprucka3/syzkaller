@@ -1,0 +1,79 @@
+set_robust_list(0x5555562796e0, 24)     = 0
+chdir("./0")                            = 0
+prctl(PR_SET_PDEATHSIG, SIGKILL)        = 0
+setpgid(0, 0)                           = 0
+symlinkat("/syzcgroup/unified/syz0", AT_FDCWD, "./cgroup") = 0
+symlinkat("/syzcgroup/cpu/syz0", AT_FDCWD, "./cgroup.cpu") = 0
+symlinkat("/syzcgroup/net/syz0", AT_FDCWD, "./cgroup.net") = 0
+openat(AT_FDCWD, "/proc/self/oom_score_adj", O_WRONLY|O_CLOEXEC) = 5
+write(5, "1000", 4)                     = 4
+close(5)                                = 0
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, 0x7ffe4fe7c3e0, 1000)         = -1 EAGAIN (Try again)
+symlinkat("/dev/binderfs", AT_FDCWD, "./binderfs") = 0
+close(249)                              = 0
+close(248)                              = 0
+close(4)                                = 0
+futex(0x73fd388fbf8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x73fd388fbf88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [493ms] -> syz_80211_join_ibs"..., 34) = 34
+write(2, "0x20000040", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x20000080", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x6", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START 80211_join_ibss", 25) = 25
+socket(AF_NETLINK, SOCK_RAW, NETLINK_GENERIC) = 4
+sendto(4, {{len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00"}, 32, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 32
+recvfrom(4, {{len=2504, type=0x10 /* NLMSG_??? */, flags=0, seq=0, pid=1419}, "\x01\x02\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00\x06\x00\x01\x00\x1c\x00\x00\x00\x08\x00\x03\x00\x01\x00\x00\x00"...}, 4096, 0, NULL, NULL) = 2504
+recvfrom(4, {{len=36, type=NLMSG_ERROR, flags=NLM_F_CAPPED, seq=0, pid=1419}, {error=0, msg={len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}}}, 4096, 0, NULL, NULL) = 36
+socket(AF_UNIX, SOCK_DGRAM|SOCK_CLOEXEC, 0) = 5
+ioctl(5, SIOCGIFINDEX, {ifr_name="wlan0", }) = 0
+close(5)                                = 0
+sendto(4, {{len=36, type=0x1c /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x06\x00\x00\x00\x08\x00\x03\x00\x31\x00\x00\x00\x08\x00\x05\x00\x01\x00\x00\x00"}, 36, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 36
+recvfrom(4, {{len=36, type=NLMSG_ERROR, flags=NLM_F_CAPPED, seq=0, pid=1419}, {error=0, msg={len=36, type=0x1c /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}}}, 4096, 0, NULL, NULL) = 36
+socket(AF_INET, SOCK_DGRAM, IPPROTO_IP) = 5
+ioctl(5, SIOCGIFFLAGS, {ifr_name="wlan0", ifr_flags=IFF_UP|IFF_BROADCAST|IFF_RUNNING|IFF_MULTICAST}) = 0
+ioctl(5, SIOCSIFFLAGS, {ifr_name="wlan0", ifr_flags=IFF_UP|IFF_BROADCAST|IFF_RUNNING|IFF_MULTICAST}) = 0
+close(5)                                = 0
+sendto(4, {{len=64, type=0x1c /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x2b\x00\x00\x00\x08\x00\x03\x00\x31\x00\x00\x00\x0a\x00\x34\x00\x01\x01\x01\x01\x01\x01\x00\x00\x08\x00\x26\x00\x6c\x09\x00\x00"...}, 64, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 64
+recvfrom(4, {{len=84, type=NLMSG_ERROR, flags=0, seq=0, pid=1419}, {error=-EALREADY, msg={{len=64, type=0x1c /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x2b\x00\x00\x00\x08\x00\x03\x00\x31\x00\x00\x00\x0a\x00\x34\x00\x01\x01\x01\x01\x01\x01\x00\x00\x08\x00\x26\x00\x6c\x09\x00\x00"...}}}, 4096, 0, NULL, NULL) = 84
+write(2, "nl80211_join_ibss failed: Operat"..., 56) = 56
+write(2, "nl80211_setup_ibss_interface: nl"..., 75) = 75
+close(4)                                = 0
+write(2, "syz_80211_join_ibss: failed set "..., 58) = 58
+write(2, "#0 [498ms] <- syz_80211_join_ibs"..., 52) = 52
+write(2, " errno=114", 10)              = 10
+write(2, "\n", 1)                       = 1
+futex(0x73fd388fbf8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x73fd388fbf88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [499ms] -> syz_80211_inject_f"..., 37) = 37
+write(2, "0x200000c0", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x20000100", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x36", 4)                     = 4
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_80211_inject_frame", 32) = 32
+socket(AF_NETLINK, SOCK_RAW, NETLINK_GENERIC) = 4
+sendto(4, {{len=40, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x13\x00\x02\x00\x4d\x41\x43\x38\x30\x32\x31\x31\x5f\x48\x57\x53\x49\x4d\x00\x00"}, 40, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 40
+recvfrom(4, {{len=224, type=0x10 /* NLMSG_??? */, flags=0, seq=0, pid=1419}, "\x01\x02\x00\x00\x13\x00\x02\x00\x4d\x41\x43\x38\x30\x32\x31\x31\x5f\x48\x57\x53\x49\x4d\x00\x00\x06\x00\x01\x00\x1d\x00\x00\x00"...}, 4096, 0, NULL, NULL) = 224
+recvfrom(4, {{len=36, type=NLMSG_ERROR, flags=NLM_F_CAPPED, seq=0, pid=1419}, {error=0, msg={len=40, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}}}, 4096, 0, NULL, NULL) = 36
+sendto(4, {{len=20, type=0x1d /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x01\x00\x00\x00"}, 20, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 20
+recvfrom(4, {{len=40, type=NLMSG_ERROR, flags=0, seq=0, pid=1419}, {error=-EOPNOTSUPP, msg={{len=20, type=0x1d /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x01\x00\x00\x00"}}}, 4096, 0, NULL, NULL) = 40
+write(2, "hwsim_register_device failed: Op"..., 54) = 54
+write(2, "syz_80211_inject_frame: failed t"..., 59) = 59
+close(4)                                = 0
+write(2, "#0 [503ms] <- syz_80211_inject_f"..., 55) = 55
+write(2, " errno=95", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x73fd388fbf8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+clock_nanosleep(CLOCK_REALTIME, 0, {tv_sec=0, tv_nsec=100000000}, NULL) = 0
+clock_nanosleep(CLOCK_REALTIME, 0, {tv_sec=0, tv_nsec=100000000}, NULL) = 0
+clock_nanosleep(CLOCK_REALTIME, 0, {tv_sec=0, tv_nsec=100000000}, NULL) = 0
+exit_group(0)                           = ?
++++ exited with 0 +++

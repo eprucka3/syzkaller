@@ -1,0 +1,41 @@
+set_robust_list(0x5555569666e0, 24)     = 0
+chdir("./0")                            = 0
+prctl(PR_SET_PDEATHSIG, SIGKILL)        = 0
+setpgid(0, 0)                           = 0
+symlinkat("/syzcgroup/unified/syz0", AT_FDCWD, "./cgroup") = 0
+symlinkat("/syzcgroup/cpu/syz0", AT_FDCWD, "./cgroup.cpu") = 0
+symlinkat("/syzcgroup/net/syz0", AT_FDCWD, "./cgroup.net") = 0
+openat(AT_FDCWD, "/proc/self/oom_score_adj", O_WRONLY|O_CLOEXEC) = 5
+write(5, "1000", 4)                     = 4
+close(5)                                = 0
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, 0x7fffc7aa6610, 1000)         = -1 EAGAIN (Try again)
+symlinkat("/dev/binderfs", AT_FDCWD, "./binderfs") = 0
+close(249)                              = 0
+close(248)                              = 0
+close(4)                                = 0
+futex(0x766290946f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x766290946f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [589ms] -> syz_clone(", 24) = 24
+write(2, "0x11", 4)                     = 4
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START", 9)                = 9
+clone(child_stack=NULL, flags=SIGCHLD)  = 1394
+write(2, "LIZ_END: 1394", 13)           = 13
+write(2, "#0 [595ms] <- syz_clone=0x572", 29) = 29
+write(2, "\n", 1)                       = 1
+futex(0x766290946f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+exit_group(0)                           = ?
++++ exited with 0 +++

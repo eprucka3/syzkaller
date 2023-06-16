@@ -1761,6 +1761,7 @@ struct vnet_fragmentation {
 
 static long syz_emit_ethernet(volatile long a0, volatile long a1, volatile long a2)
 {
+	debug("LIZ_START syz_emit_ethernet");
 	// syz_emit_ethernet(len len[packet], packet ptr[in, eth_packet], frags ptr[in, vnet_fragmentation, opt])
 	// vnet_fragmentation {
 	// 	full	int32[0:1]
@@ -1804,9 +1805,13 @@ static long syz_emit_ethernet(volatile long a0, volatile long a1, volatile long 
 			nfrags++;
 		}
 	}
-	return writev(tunfd, vecs, nfrags);
+	long out = writev(tunfd, vecs, nfrags);
+	debug("LIZ_END syz_emit_ethernet");
+	return out;
 #else
-	return write(tunfd, data, length);
+	long out = write(tunfd, data, length);
+	debug("LIZ_END syz_emit_ethernet");
+	return out;
 #endif
 }
 #endif
@@ -2188,7 +2193,7 @@ static char* read_btf_vmlinux()
 // opening the vmlinux file or the name is not found in vmlinux.
 static long syz_btf_id_by_name(volatile long a0)
 {
-	debug("LIZ_HERE");
+	debug("LIZ_START syz_btf_id_by_name");
 	// syzlang: syz_btf_id_by_name(name ptr[in, string]) btf_id
 	// C:		syz_btf_id_by_name(char* name)
 	char* target = (char*)a0;
@@ -2250,7 +2255,7 @@ static long syz_btf_id_by_name(volatile long a0)
 		bytes_parsed += sizeof(struct btf_type) + skip;
 		idx++;
 	}
-	debug("LIZ_CALL END");
+	debug("LIZ_END syz_btf_id_by_name");
 	return -1;
 }
 
@@ -2400,7 +2405,9 @@ static long syz_open_dev(volatile long a0, volatile long a1, volatile long a2)
 		// syz_open_dev$block(dev const[0xb], major intptr, minor intptr) fd
 		char buf[128];
 		sprintf(buf, "/dev/%s/%d:%d", a0 == 0xc ? "char" : "block", (uint8)a1, (uint8)a2);
-		return open(buf, O_RDWR, 0);
+		long out = open(buf, O_RDWR, 0);
+		debug("LIZ_END: %ld", out);
+		return out;
 	} else {
 		// syz_open_dev(dev strconst, id intptr, flags flags[open_flags]) fd
 		char buf[1024];
@@ -2411,9 +2418,10 @@ static long syz_open_dev(volatile long a0, volatile long a1, volatile long a2)
 			*hash = '0' + (char)(a1 % 10); // 10 devices should be enough for everyone.
 			a1 /= 10;
 		}
-		return open(buf, a2, 0);
+		long out = open(buf, a2, 0);
+		debug("LIZ_END: %ld", out);
+		return out;
 	}
-	debug("LIZ_END");
 }
 #endif
 
@@ -2426,6 +2434,7 @@ static long syz_open_dev(volatile long a0, volatile long a1, volatile long a2)
 static long syz_open_procfs(volatile long a0, volatile long a1)
 {
 	// syz_open_procfs(pid pid, file ptr[in, string[procfs_file]]) fd
+	debug("LIZ_START");
 
 	char buf[128];
 	memset(buf, 0, sizeof(buf));
@@ -2439,6 +2448,7 @@ static long syz_open_procfs(volatile long a0, volatile long a1)
 	int fd = open(buf, O_RDWR);
 	if (fd == -1)
 		fd = open(buf, O_RDONLY);
+	debug("LIZ_END");
 	return fd;
 }
 #endif
@@ -2489,7 +2499,10 @@ static long syz_init_net_socket(volatile long domain, volatile long type, volati
 #else
 static long syz_init_net_socket(volatile long domain, volatile long type, volatile long proto)
 {
-	return syscall(__NR_socket, domain, type, proto);
+	debug("LIZ_START syz_init_net_socket");
+	long out = syscall(__NR_socket, domain, type, proto);
+	debug("LIZ_END syz_init_net_socket");
+	return out;
 }
 #endif
 #endif
@@ -2855,13 +2868,16 @@ static void initialize_vhci()
 #if SYZ_EXECUTOR || __NR_syz_emit_vhci && SYZ_VHCI_INJECTION
 static long syz_emit_vhci(volatile long a0, volatile long a1)
 {
+	debug("LIZ_START: syz_emit_vhci");
 	if (vhci_fd < 0)
 		return (uintptr_t)-1;
 
 	char* data = (char*)a0;
 	uint32 length = a1;
 
-	return write(vhci_fd, data, length);
+	long out = write(vhci_fd, data, length);
+	debug("LIZ_END: syz_emit_vhci");
+	return out;
 }
 #endif
 
@@ -2871,6 +2887,7 @@ static long syz_emit_vhci(volatile long a0, volatile long a1)
 
 static long syz_genetlink_get_family_id(volatile long name, volatile long sock_arg)
 {
+	debug("LIZ_START syz_genetlink");
 	debug("syz_genetlink_get_family_id(%s, %d)\n", (char*)name, (int)sock_arg);
 	int fd = sock_arg;
 	if (fd < 0) {
@@ -2888,7 +2905,7 @@ static long syz_genetlink_get_family_id(volatile long name, volatile long sock_a
 		debug("syz_genetlink_get_family_id: netlink_query_family_id failed: %d\n", ret);
 		return -1;
 	}
-
+	debug("LIZ_END syz_genetlink");
 	return ret;
 }
 #endif
@@ -3025,6 +3042,7 @@ static long syz_mount_image(
     volatile unsigned long size,
     volatile long image)
 {
+	debug("LIZ_START syz_mount_image");
 	unsigned char* data = (unsigned char*)image;
 	int res = -1, err = 0, loopfd = -1, need_loop_device = !!size;
 	char* mount_opts = (char*)optsarg;
@@ -3101,6 +3119,7 @@ error_clear_loop:
 		close(loopfd);
 	}
 	errno = err;
+	debug("LIZ_END syz_mount_image");
 	return res;
 }
 #endif
@@ -5197,6 +5216,7 @@ static volatile long syz_fuse_handle_req(volatile long a0, // /dev/fuse fd.
 					 volatile long a2, // Buffer len.
 					 volatile long a3) // syz_fuse_req_out.
 {
+	debug("LIZ_START syz_fuse_handle_req");
 	struct syz_fuse_req_out* req_out = (struct syz_fuse_req_out*)a3;
 	struct fuse_out_header* out_hdr = NULL;
 	char* buf = (char*)a1;
@@ -5321,7 +5341,9 @@ static volatile long syz_fuse_handle_req(volatile long a0, // /dev/fuse fd.
 		return -1;
 	}
 
-	return fuse_send_response(fd, in_hdr, out_hdr);
+	long out = fuse_send_response(fd, in_hdr, out_hdr);
+	debug("LIZ_END syz_fuse_handle_req");
+	return out;
 }
 #endif
 
@@ -5392,6 +5414,7 @@ static int hwsim_inject_frame(struct nlmsg* nlmsg, int sock, int hwsim_family, u
 
 static long syz_80211_inject_frame(volatile long a0, volatile long a1, volatile long a2)
 {
+	debug("LIZ_START syz_80211_inject_frame");
 	uint8* mac_addr = (uint8*)a0;
 	uint8* buf = (uint8*)a1;
 	int buf_len = (int)a2;
@@ -5422,6 +5445,7 @@ static long syz_80211_inject_frame(volatile long a0, volatile long a1, volatile 
 		debug("syz_80211_inject_frame: failed to inject message, ret %d\n", ret);
 		return -1;
 	}
+	debug("LIZ_END syz_80211_inject_frame");
 
 	return 0;
 }
@@ -5438,6 +5462,7 @@ static long syz_80211_inject_frame(volatile long a0, volatile long a1, volatile 
 
 static long syz_80211_join_ibss(volatile long a0, volatile long a1, volatile long a2, volatile long a3)
 {
+	debug("LIZ_START 80211_join_ibss");
 	char* interface = (char*)a0;
 	uint8* ssid = (uint8*)a1;
 	int ssid_len = (int)a2;
@@ -5485,6 +5510,7 @@ static long syz_80211_join_ibss(volatile long a0, volatile long a1, volatile lon
 		}
 	}
 
+	debug("LIZ_END 80211_join_ibss");
 	return 0;
 }
 
@@ -5525,6 +5551,7 @@ static long handle_clone_ret(long ret)
 static long syz_clone(volatile long flags, volatile long stack, volatile long stack_len,
 		      volatile long ptid, volatile long ctid, volatile long tls)
 {
+	debug("LIZ_START");
 	// ABI requires 16-byte stack alignment.
 	long sp = (stack + stack_len) & ~15;
 #if SYZ_EXECUTOR || SYZ_HANDLE_SEGV
@@ -5532,7 +5559,9 @@ static long syz_clone(volatile long flags, volatile long stack, volatile long st
 #endif
 	// Clear the CLONE_VM flag. Otherwise it'll very likely corrupt syz-executor.
 	long ret = (long)syscall(__NR_clone, flags & ~CLONE_VM, sp, ptid, ctid, tls);
-	return handle_clone_ret(ret);
+	long out = handle_clone_ret(ret);
+	debug("LIZ_END: %ld", out);
+	return out;
 }
 #endif
 

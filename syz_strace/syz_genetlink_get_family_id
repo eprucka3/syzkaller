@@ -1,0 +1,188 @@
+set_robust_list(0x55555651a6e0, 24)     = 0
+chdir("./0")                            = 0
+prctl(PR_SET_PDEATHSIG, SIGKILL)        = 0
+setpgid(0, 0)                           = 0
+symlinkat("/syzcgroup/unified/syz0", AT_FDCWD, "./cgroup") = 0
+symlinkat("/syzcgroup/cpu/syz0", AT_FDCWD, "./cgroup.cpu") = 0
+symlinkat("/syzcgroup/net/syz0", AT_FDCWD, "./cgroup.net") = 0
+openat(AT_FDCWD, "/proc/self/oom_score_adj", O_WRONLY|O_CLOEXEC) = 5
+write(5, "1000", 4)                     = 4
+close(5)                                = 0
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, "33\0\0\0\26\252\252\252\252\252\252\206\335`\0\0\0\08\0\1\376\200\0\0\0\0\0\0\0\0"..., 1000) = 110
+read(200, 0x7ffc07b94d90, 1000)         = -1 EAGAIN (Try again)
+symlinkat("/dev/binderfs", AT_FDCWD, "./binderfs") = 0
+close(249)                              = 0
+close(248)                              = 0
+close(4)                                = 0
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [636ms] -> syz_genetlink_get_"..., 50) = 50
+write(2, "0x20000040", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0xffffffffffffffff", 18)      = 18
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_genetlink", 23) = 23
+write(2, "syz_genetlink_get_family_id(nl80"..., 41) = 41
+socket(AF_NETLINK, SOCK_RAW, NETLINK_GENERIC) = 4
+sendto(4, {{len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00"}, 32, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 32
+recvfrom(4, {{len=2504, type=0x10 /* NLMSG_??? */, flags=0, seq=0, pid=1422}, "\x01\x02\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00\x06\x00\x01\x00\x1c\x00\x00\x00\x08\x00\x03\x00\x01\x00\x00\x00"...}, 4096, 0, NULL, NULL) = 2504
+recvfrom(4, {{len=36, type=NLMSG_ERROR, flags=NLM_F_CAPPED, seq=0, pid=1422}, {error=0, msg={len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}}}, 4096, 0, NULL, NULL) = 36
+close(4)                                = 0
+write(2, "LIZ_END syz_genetlink", 21)   = 21
+write(2, "#0 [639ms] <- syz_genetlink_get_"..., 54) = 54
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [639ms] -> syz_genetlink_get_"..., 53) = 53
+write(2, "0x20000080", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0xffffffffffffffff", 18)      = 18
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_genetlink", 23) = 23
+write(2, "syz_genetlink_get_family_id(802."..., 46) = 46
+socket(AF_NETLINK, SOCK_RAW, NETLINK_GENERIC) = 4
+sendto(4, {{len=40, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x11\x00\x02\x00\x38\x30\x32\x2e\x31\x35\x2e\x34\x20\x4d\x41\x43\x00\x00\x00\x00"}, 40, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 40
+recvfrom(4, {{len=60, type=NLMSG_ERROR, flags=0, seq=0, pid=1422}, {error=-ENOENT, msg={{len=40, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x11\x00\x02\x00\x38\x30\x32\x2e\x31\x35\x2e\x34\x20\x4d\x41\x43\x00\x00\x00\x00"}}}, 4096, 0, NULL, NULL) = 60
+write(2, "netlink: failed to get family id"..., 77) = 77
+close(4)                                = 0
+write(2, "syz_genetlink_get_family_id: net"..., 64) = 64
+write(2, "#0 [644ms] <- syz_genetlink_get_"..., 71) = 71
+write(2, " errno=2", 8)                 = 8
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [644ms] -> socket$nl_generic(", 32) = 32
+write(2, "0x10", 4)                     = 4
+write(2, ", ", 2)                       = 2
+write(2, "0x3", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x10", 4)                     = 4
+write(2, ")\n", 2)                      = 2
+socket(AF_NETLINK, SOCK_RAW, NETLINK_GENERIC) = 4
+write(2, "#0 [644ms] <- socket$nl_generic="..., 35) = 35
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [645ms] -> syz_genetlink_get_"..., 50) = 50
+write(2, "0x200000c0", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x4", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_genetlink", 23) = 23
+write(2, "syz_genetlink_get_family_id(nl80"..., 40) = 40
+sendto(4, {{len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00"}, 32, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 32
+recvfrom(4, {{len=2504, type=0x10 /* NLMSG_??? */, flags=0, seq=0, pid=1422}, "\x01\x02\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00\x06\x00\x01\x00\x1c\x00\x00\x00\x08\x00\x03\x00\x01\x00\x00\x00"...}, 4096, 0, NULL, NULL) = 2504
+recvfrom(4, {{len=36, type=NLMSG_ERROR, flags=NLM_F_CAPPED, seq=0, pid=1422}, {error=0, msg={len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}}}, 4096, 0, NULL, NULL) = 36
+write(2, "LIZ_END syz_genetlink", 21)   = 21
+write(2, "#0 [646ms] <- syz_genetlink_get_"..., 54) = 54
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [646ms] -> syz_genetlink_get_"..., 53) = 53
+write(2, "0x20000100", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x4", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_genetlink", 23) = 23
+write(2, "syz_genetlink_get_family_id(802."..., 45) = 45
+sendto(4, {{len=40, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x11\x00\x02\x00\x38\x30\x32\x2e\x31\x35\x2e\x34\x20\x4d\x41\x43\x00\x00\x00\x00"}, 40, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 40
+recvfrom(4, {{len=60, type=NLMSG_ERROR, flags=0, seq=0, pid=1422}, {error=-ENOENT, msg={{len=40, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x11\x00\x02\x00\x38\x30\x32\x2e\x31\x35\x2e\x34\x20\x4d\x41\x43\x00\x00\x00\x00"}}}, 4096, 0, NULL, NULL) = 60
+write(2, "netlink: failed to get family id"..., 77) = 77
+write(2, "syz_genetlink_get_family_id: net"..., 64) = 64
+write(2, "#0 [648ms] <- syz_genetlink_get_"..., 71) = 71
+write(2, " errno=2", 8)                 = 8
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [648ms] -> syz_genetlink_get_"..., 50) = 50
+write(2, "0x20000140", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x4", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_genetlink", 23) = 23
+write(2, "syz_genetlink_get_family_id(nl80"..., 40) = 40
+sendto(4, {{len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00"}, 32, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 32
+recvfrom(4, {{len=2504, type=0x10 /* NLMSG_??? */, flags=0, seq=0, pid=1422}, "\x01\x02\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00\x06\x00\x01\x00\x1c\x00\x00\x00\x08\x00\x03\x00\x01\x00\x00\x00"...}, 4096, 0, NULL, NULL) = 2504
+recvfrom(4, {{len=36, type=NLMSG_ERROR, flags=NLM_F_CAPPED, seq=0, pid=1422}, {error=0, msg={len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}}}, 4096, 0, NULL, NULL) = 36
+write(2, "LIZ_END syz_genetlink", 21)   = 21
+write(2, "#0 [649ms] <- syz_genetlink_get_"..., 54) = 54
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [650ms] -> syz_init_net_socke"..., 45) = 45
+write(2, "0x10", 4)                     = 4
+write(2, ", ", 2)                       = 2
+write(2, "0x3", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x10", 4)                     = 4
+write(2, ")\n", 2)                      = 2
+openat(AT_FDCWD, "/proc/self/ns/net", O_RDONLY) = 5
+setns(201, 0)                           = 0
+socket(AF_NETLINK, SOCK_RAW, NETLINK_GENERIC) = 6
+setns(5, 0)                             = 0
+close(5)                                = 0
+write(2, "#0 [651ms] <- syz_init_net_socke"..., 48) = 48
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [651ms] -> syz_genetlink_get_"..., 50) = 50
+write(2, "0x20000180", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x6", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_genetlink", 23) = 23
+write(2, "syz_genetlink_get_family_id(nl80"..., 40) = 40
+sendto(6, {{len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00"}, 32, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 32
+recvfrom(6, {{len=2504, type=0x10 /* NLMSG_??? */, flags=0, seq=0, pid=1422}, "\x01\x02\x00\x00\x0c\x00\x02\x00\x6e\x6c\x38\x30\x32\x31\x31\x00\x06\x00\x01\x00\x1c\x00\x00\x00\x08\x00\x03\x00\x01\x00\x00\x00"...}, 4096, 0, NULL, NULL) = 2504
+recvfrom(6, {{len=36, type=NLMSG_ERROR, flags=NLM_F_CAPPED, seq=0, pid=1422}, {error=0, msg={len=32, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}}}, 4096, 0, NULL, NULL) = 36
+write(2, "LIZ_END syz_genetlink", 21)   = 21
+write(2, "#0 [652ms] <- syz_genetlink_get_"..., 54) = 54
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [653ms] -> syz_genetlink_get_"..., 53) = 53
+write(2, "0x200001c0", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x6", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_genetlink", 23) = 23
+write(2, "syz_genetlink_get_family_id(802."..., 45) = 45
+sendto(6, {{len=40, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x11\x00\x02\x00\x38\x30\x32\x2e\x31\x35\x2e\x34\x20\x4d\x41\x43\x00\x00\x00\x00"}, 40, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = 40
+recvfrom(6, {{len=60, type=NLMSG_ERROR, flags=0, seq=0, pid=1422}, {error=-ENOENT, msg={{len=40, type=0x10 /* NLMSG_??? */, flags=NLM_F_REQUEST|NLM_F_ACK, seq=0, pid=0}, "\x03\x00\x00\x00\x11\x00\x02\x00\x38\x30\x32\x2e\x31\x35\x2e\x34\x20\x4d\x41\x43\x00\x00\x00\x00"}}}, 4096, 0, NULL, NULL) = 60
+write(2, "netlink: failed to get family id"..., 77) = 77
+write(2, "syz_genetlink_get_family_id: net"..., 64) = 64
+write(2, "#0 [654ms] <- syz_genetlink_get_"..., 71) = 71
+write(2, " errno=2", 8)                 = 8
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [655ms] -> socket$inet_udp(", 30) = 30
+write(2, "0x2", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x2", 3)                      = 3
+write(2, ", ", 2)                       = 2
+write(2, "0x0", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+socket(AF_INET, SOCK_DGRAM, IPPROTO_IP) = 5
+write(2, "#0 [655ms] <- socket$inet_udp=0x"..., 33) = 33
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+futex(0x7a38318f2f88, FUTEX_WAKE_PRIVATE, 1000000) = 0
+write(2, "#0 [655ms] -> syz_genetlink_get_"..., 50) = 50
+write(2, "0x20000200", 10)              = 10
+write(2, ", ", 2)                       = 2
+write(2, "0x5", 3)                      = 3
+write(2, ")\n", 2)                      = 2
+write(2, "LIZ_START syz_genetlink", 23) = 23
+write(2, "syz_genetlink_get_family_id(nl80"..., 40) = 40
+sendto(5, " \0\0\0\20\0\5\0\0\0\0\0\0\0\0\0\3\0\0\0\f\0\2\0nl80211\0", 32, 0, {sa_family=AF_NETLINK, nl_pid=0, nl_groups=00000000}, 12) = -1 EINVAL (Invalid argument)
+write(2, "netlink_send_ext: short netlink "..., 54) = 54
+write(2, "netlink: failed to get family id"..., 63) = 63
+write(2, "syz_genetlink_get_family_id: net"..., 64) = 64
+write(2, "#0 [656ms] <- syz_genetlink_get_"..., 68) = 68
+write(2, " errno=22", 9)                = 9
+write(2, "\n", 1)                       = 1
+futex(0x7a38318f2f8c, FUTEX_WAKE_PRIVATE, 1000000) = 0
+exit_group(0)                           = ?
++++ exited with 0 +++
