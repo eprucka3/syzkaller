@@ -59,7 +59,7 @@ type BugFrames struct {
 // RPCManagerView restricts interface between RPCServer and Manager.
 type RPCManagerView interface {
 	fuzzerConnect([]host.KernelModule) (
-		[]rpctype.Input, BugFrames, map[uint32]uint32, map[uint32]uint32, error)
+		[]rpctype.Input, BugFrames, map[uint32]uint32, error)
 	machineChecked(result *rpctype.CheckArgs, enabledSyscalls map[*prog.Syscall]bool)
 	newInput(inp rpctype.Input, sign signal.Signal) bool
 	candidateBatch(size int) []rpctype.Candidate
@@ -96,7 +96,7 @@ func (serv *RPCServer) Connect(a *rpctype.ConnectArgs, r *rpctype.ConnectRes) er
 		serv.canonicalModules = cover.NewCanonicalizer(a.Modules, serv.cfg.Cover)
 		serv.modules = a.Modules
 	}
-	corpus, bugFrames, coverFilter, coverBitmapPCs, err := serv.mgr.fuzzerConnect(serv.modules)
+	corpus, bugFrames, coverFilter, err := serv.mgr.fuzzerConnect(serv.modules)
 	if err != nil {
 		return err
 	}
@@ -114,7 +114,7 @@ func (serv *RPCServer) Connect(a *rpctype.ConnectArgs, r *rpctype.ConnectRes) er
 	r.MemoryLeakFrames = bugFrames.memoryLeaks
 	r.DataRaceFrames = bugFrames.dataRaces
 
-	instBitmapPCs := f.instModules.DecanonicalizeFilter(coverBitmapPCs)
+	instBitmapPCs := f.instModules.DecanonicalizeFilter(serv.coverFilter)
 	r.CoverFilterBitmap = createCoverageBitmap(serv.cfg.SysTarget, instBitmapPCs)
 	r.EnabledCalls = serv.cfg.Syscalls
 	r.NoMutateCalls = serv.cfg.NoMutateCalls

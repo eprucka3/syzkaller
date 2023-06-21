@@ -17,14 +17,14 @@ import (
 	"github.com/google/syzkaller/sys/targets"
 )
 
-func (mgr *Manager) createCoverageFilter() (map[uint32]uint32, map[uint32]uint32, error) {
+func (mgr *Manager) createCoverageFilter() (map[uint32]uint32, error) {
 	if len(mgr.cfg.CovFilter.Functions)+len(mgr.cfg.CovFilter.Files)+len(mgr.cfg.CovFilter.RawPCs) == 0 {
-		return nil, nil, nil
+		return nil, nil
 	}
 	// Always initialize ReportGenerator because RPCServer.NewInput will need it to filter coverage.
 	rg, err := getReportGenerator(mgr.cfg, mgr.modules)
 	if err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	pcs := make(map[uint32]uint32)
 	foreachSymbol := func(apply func(*backend.ObjectUnit)) {
@@ -33,7 +33,7 @@ func (mgr *Manager) createCoverageFilter() (map[uint32]uint32, map[uint32]uint32
 		}
 	}
 	if err := covFilterAddFilter(pcs, mgr.cfg.CovFilter.Functions, foreachSymbol); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	foreachUnit := func(apply func(*backend.ObjectUnit)) {
 		for _, unit := range rg.Units {
@@ -41,30 +41,18 @@ func (mgr *Manager) createCoverageFilter() (map[uint32]uint32, map[uint32]uint32
 		}
 	}
 	if err := covFilterAddFilter(pcs, mgr.cfg.CovFilter.Files, foreachUnit); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if err := covFilterAddRawPCs(pcs, mgr.cfg.CovFilter.RawPCs); err != nil {
-		return nil, nil, err
+		return nil, err
 	}
 	if len(pcs) == 0 {
-		return nil, nil, nil
+		return nil, nil
 	}
 	if !mgr.cfg.SysTarget.ExecutorUsesShmem {
-		return nil, nil, fmt.Errorf("coverage filter is only supported for targets that use shmem")
+		return nil, fmt.Errorf("coverage filter is only supported for targets that use shmem")
 	}
-	// Copy pcs into bitmapPCs.
-	bitmapPCs := make(map[uint32]uint32)
-	for pc, val := range pcs {
-		bitmapPCs[pc] = val
-	}
-	// After finish writing down bitmap file, for accurate filtered coverage,
-	// pcs from CMPs should be deleted.
-	for _, sym := range rg.Symbols {
-		for _, pc := range sym.CMPs {
-			delete(pcs, uint32(pc))
-		}
-	}
-	return bitmapPCs, pcs, nil
+	return pcs, nil
 }
 
 func covFilterAddFilter(pcs map[uint32]uint32, filters []string, foreach func(func(*backend.ObjectUnit))) error {
