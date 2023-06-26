@@ -128,7 +128,7 @@ config:
  - KCOV: [-arm, -s390, -nokcov]
  - KCOV_INSTRUMENT_ALL: [-arm, -s390, -nokcov]
  # Doesn't boot with KCOV_ENABLE_COMPARISONS on Cuttlefish.
- - KCOV_ENABLE_COMPARISONS: [-arm, -s390, -nokcov, -cuttlefish]
+ - KCOV_ENABLE_COMPARISONS: [-arm, -s390, -nokcov]
  - DEBUG_FS
 
  # Required for KCOV but also eliminates unnecessary non-determinism.
