@@ -280,7 +280,7 @@ bin/syz-fmt:
 	$(HOSTGO) build $(GOHOSTFLAGS) -o $@ ./tools/syz-fmt
 
 configs: kconf
-	bin/syz-kconf -config dashboard/config/linux/main.yml -sourcedir $(SOURCEDIR)
+	bin/syz-kconf -config dashboard/config/linux/main.yml -sourcedir $(SOURCEDIR) -instance android-5.15-cuttlefish
 
 tidy: descriptions
 	clang-tidy -quiet -header-filter=.* -warnings-as-errors=* \
