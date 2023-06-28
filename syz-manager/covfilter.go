@@ -52,7 +52,6 @@ func (mgr *Manager) createCoverageFilter() ([]byte, map[uint32]uint32, error) {
 	if !mgr.cfg.SysTarget.ExecutorUsesShmem {
 		return nil, nil, fmt.Errorf("coverage filter is only supported for targets that use shmem")
 	}
-	bitmap := createCoverageBitmap(mgr.cfg.SysTarget, pcs)
 	// After finish writing down bitmap file, for accurate filtered coverage,
 	// pcs from CMPs should be deleted.
 	for _, sym := range rg.Symbols {
@@ -60,6 +59,7 @@ func (mgr *Manager) createCoverageFilter() ([]byte, map[uint32]uint32, error) {
 			delete(pcs, uint32(pc))
 		}
 	}
+	bitmap := createCoverageBitmap(mgr.cfg.SysTarget, pcs)
 	return bitmap, pcs, nil
 }
 
