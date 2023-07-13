@@ -232,6 +232,7 @@ func (ctx *Context) IsInstanceRunning(name string) bool {
 		log.Logf(0, "LIZ_TESTING: failed IsInstanceRunning. err: %v", err)
 		return false
 	}
+	log.Logf(0, "LIZ_TESTING: Status: %v", inst.Status)
 	return inst.Status == "RUNNING"
 }
 
