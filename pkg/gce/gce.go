@@ -19,6 +19,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/google/syzkaller/pkg/log"
+
 	"golang.org/x/net/context"
 	"golang.org/x/oauth2"
 	"golang.org/x/oauth2/google"
@@ -227,6 +229,7 @@ func (ctx *Context) IsInstanceRunning(name string) bool {
 		return
 	})
 	if err != nil {
+		log.Logf(0, "LIZ_TESTING: failed IsInstanceRunning. err: %v", err)
 		return false
 	}
 	return inst.Status == "RUNNING"
