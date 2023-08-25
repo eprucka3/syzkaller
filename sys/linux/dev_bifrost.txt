@@ -1,18 +1,12 @@
 # Copyright 2021 syzkaller project authors. All rights reserved.
 # Use of this source code is governed by Apache 2 LICENSE that can be found in the LICENSE file.
 
-# The source file of mali bifrost ioctl can be found in ChromeOS source tree:
-# https://chromium.googlesource.com/chromiumos/third_party/kernel/+/chromeos-4.19/drivers/gpu/arm/bifrost/mali_kbase_ioctl.h
+# Generated on android14-gs-pixel-5.15-udc-d1
 
-# Not upstream, generated on:
-# https://chromium.googlesource.com/chromiumos/third_party/kernel d2a8a1eb8b86
-meta noextract
-
-include <asm/page.h>
-include <drivers/gpu/arm/bifrost/mali_kbase_debug.h>
-include <drivers/gpu/arm/bifrost/mali_kbase_hwcnt_reader.h>
-include <drivers/gpu/arm/bifrost/mali_kbase_ioctl.h>
-include <drivers/gpu/arm/bifrost/mali_base_kernel.h>
+include <gpu/mali_kbase/mali_kbase_debug.h>
+include <gpu/common/include/uapi/gpu/arm/midgard/mali_kbase_hwcnt_reader.h>
+include <gpu/common/include/uapi/gpu/arm/midgard/mali_kbase_ioctl.h>
+include <gpu/common/include/uapi/gpu/arm/midgard/mali_base_kernel.h>
 include <uapi/linux/fcntl.h>
 
 resource fd_bifrost[fd]
@@ -37,14 +31,14 @@ ioctl$KBASE_IOCTL_CS_TILER_HEAP_TERM(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_TIL
 ioctl$KBASE_IOCTL_CS_TILER_HEAP_INIT_1_13(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_TILER_HEAP_INIT_1_13], arg ptr[inout, kbase_ioctl_cs_tiler_heap_init_1_13])
 ioctl$KBASE_IOCTL_CS_TILER_HEAP_INIT(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_TILER_HEAP_INIT], arg ptr[inout, kbase_ioctl_cs_tiler_heap_init])
 ioctl$KBASE_IOCTL_KCPU_QUEUE_ENQUEUE(fd fd_bifrost, cmd const[KBASE_IOCTL_KCPU_QUEUE_ENQUEUE], arg ptr[in, kbase_ioctl_kcpu_queue_enqueue])
-ioctl$KBASE_IOCTL_KCPU_QUEUE_DELETE(fd fd_bifrost, cmd const[BASE_IOCTL_KCPU_QUEUE_DELETE], arg ptr[in, base_ioctl_kcpu_queue_delete])
+ioctl$KBASE_IOCTL_KCPU_QUEUE_DELETE(fd fd_bifrost, cmd const[BASE_IOCTL_KCPU_QUEUE_DELETE], arg ptr[in, kbase_ioctl_kcpu_queue_delete])
 ioctl$KBASE_IOCTL_KCPU_QUEUE_CREATE(fd fd_bifrost, cmd const[BASE_IOCTL_KCPU_QUEUE_CREATE], arg ptr[out, kbase_ioctl_kcpu_queue_new])
 ioctl$KBASE_IOCTL_CS_EVENT_SIGNAL(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_EVENT_SIGNAL])
 ioctl$KBASE_IOCTL_CS_QUEUE_GROUP_TERMINATE(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_GROUP_TERMINATE], arg ptr[in, kbase_ioctl_cs_queue_terminate])
 ioctl$KBASE_IOCTL_CS_QUEUE_GROUP_CREATE(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_GROUP_CREATE], arg ptr[inout, kbase_ioctl_cs_queue_group_create])
 ioctl$KBASE_IOCTL_CS_QUEUE_GROUP_CREATE_1_6(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_GROUP_CREATE_1_6], arg ptr[inout, kbase_ioctl_cs_queue_group_create_1_6])
 ioctl$KBASE_IOCTL_CS_QUEUE_TERMINATE(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_TERMINATE], arg ptr[in, kbase_ioctl_cs_queue_terminate])
-ioctl$KBASE_IOCTL_CS_QUEUE_REGISTER_EX(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_REGISTER_EX], arg ptr[in, base_ioctl_cs_queue_register_ex])
+ioctl$KBASE_IOCTL_CS_QUEUE_REGISTER_EX(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_REGISTER_EX], arg ptr[in, kbase_ioctl_cs_queue_register_ex])
 ioctl$KBASE_IOCTL_CS_QUEUE_BIND(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_BIND], arg ptr[inout, kbase_ioctl_cs_queue_bind])
 ioctl$KBASE_IOCTL_CS_QUEUE_KICK(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_KICK], arg ptr[in, kbase_ioctl_cs_queue_kick])
 ioctl$KBASE_IOCTL_CS_QUEUE_REGISTER(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_REGISTER], arg ptr[in, base_ioctl_cs_queue_register])
@@ -369,8 +363,8 @@ kbase_ioctl_cs_cpu_queue_info {
 kbase_ioctl_cs_get_glb_iface {
 	max_group_num  		int32
 	max_total_stream_num 	int32
-	groups_ptr    		ptr_64[in, user_addr]
-	streams_ptr   		ptr_64[in, user_addr]
+	groups_ptr    		ptr64[in, user_addr]
+	streams_ptr   		ptr64[in, user_addr]
 	glb_version   		int32  (out_overlay)
 	features      		int32
 	group_num     		int32
@@ -417,24 +411,30 @@ kbase_ioctl_kcpu_queue_delete {
 	pad			array[const[0, int8], 7]
 }
 
+# addr			ptr64[out, array[kbase_kcpu_command_queue]]
 kbase_ioctl_kcpu_queue_enqueue {
-	addr			ptr64[out, array[kbase_kcpu_command_queue]]
+	addr			ptr64[out, gpu_addr]
 	nr_commands		len[addr, int32]
-	id			int8[0:256]	
+	id			int8[0:256]
 	padding			array[const[0, int8], 3]
 }
 
-kbase_kcpu_command_queue {
-	# LIZ TODO: Not sure how to create queue:
-	# mali_kbase/csf/mali_kbase_csf_kcpu.h:279
-	# Includes mutex. Potentially can get from kcpu_queue_new
-}
+# kbase_kcpu_command_queue {
+# 	# LIZ TODO: Not sure how to create queue:
+# 	# mali_kbase/csf/mali_kbase_csf_kcpu.h:279
+# 	# Includes mutex. Potentially can get from kcpu_queue_new
+# }
 
 kbase_ioctl_cs_queue_terminate {
-	buffer_gpu_addr		ptr64[in, array[int8]]	
+	buffer_gpu_addr		ptr64[in, array[int8]]
 }
 
 kbase_ioctl_cs_queue_group_create [
+	in kbase_ioctl_cs_queue_group_create_in
+	out kbase_ioctl_cs_queue_group_create_out
+] [varlen]
+
+kbase_ioctl_cs_queue_group_create_in {
 	tiler_mask		int64
 	fragment_mask		int64
 	compute_mask		int64
@@ -445,12 +445,21 @@ kbase_ioctl_cs_queue_group_create [
 	compute_max		int8
 	csi_handlers		flags[csf_csi_flags, int8]
 	padding			array[const[0, int8], 2]
-	group_handle		int8  (out_overlay)
+	reserved		int64
+}
+
+kbase_ioctl_cs_queue_group_create_out {
+	group_handle		int8
 	padding			array[const[0, int8], 3]
-	group_uid		int32	
+	group_uid		int32
+}
+
+kbase_ioctl_cs_queue_group_create_1_6 [
+	in kbase_ioctl_cs_queue_group_create_1_6_in
+	out kbase_ioctl_cs_queue_group_create_1_6_out
 ] [varlen]
 
-kbase_ioctl_cs_queue_group_create_1_t6 [
+kbase_ioctl_cs_queue_group_create_1_6_in {
 	tiler_mask		int64
 	fragment_mask		int64
 	compute_mask		int64
@@ -459,11 +468,15 @@ kbase_ioctl_cs_queue_group_create_1_t6 [
 	tiler_max		int8
 	fragment_max		int8
 	compute_max		int8
+	padding			array[const[0, int8], 2]
+	reserved		int64
+}
+
+kbase_ioctl_cs_queue_group_create_1_6_out {
+	group_handle		int8
 	padding			array[const[0, int8], 3]
-	group_handle		int8  (out_overlay)
-	padding			array[const[0, int8], 3]
-	group_uid		int32	
-] [varlen]
+	group_uid		int32
+}
 
 base_ioctl_cs_queue_terminate {
 	buffer_gpu_addr		ptr64[in, array[int8]]
@@ -471,7 +484,7 @@ base_ioctl_cs_queue_terminate {
 
 #LIZ TODO: Check offset values.
 kbase_ioctl_cs_queue_register_ex {
-	buffer_gpu_addr		ptr64[in, array[int8]]	
+	buffer_gpu_addr		ptr64[in, array[int8]]
 	buffer_size		len[buffer_gpu_addr, int32]
 	priority		int8
 	padding			array[const[0, int8], 3]
@@ -484,14 +497,22 @@ kbase_ioctl_cs_queue_register_ex {
 }
 
 kbase_ioctl_cs_queue_bind [
-	buffer_gpu_addr		ptr64[in, array[int8]]	
+	in			kbase_ioctl_cs_queue_bind_in
+	out			kbase_ioctl_cs_queue_bind_out
+]
+
+kbase_ioctl_cs_queue_bind_in {
+	buffer_gpu_addr		ptr64[in, array[int8]]
 	group_handle		int8[0:256]
 	csi_index		int8
-	padding			array[const[0, int8], 6]  (out_overlay)
-	mmap_handle		int64
-] [varlen]
+	padding			array[const[0, int8], 6]
+}
 
-base_ioctl_cs_queue_kick {
+kbase_ioctl_cs_queue_bind_out {
+	mmap_handle		int64
+}
+
+kbase_ioctl_cs_queue_kick {
 	buffer_gpu_addr		ptr64[in, array[int8]]
 }
 
@@ -507,13 +528,13 @@ kbase_ioctl_buffer_liveness_update {
 	live_ranges_count	len[live_ranges_address, int64]
 	buffer_va_address	ptr64[in, array[user_addr]]
 	buffer_sizes_address	array[int64]
-	buffer_count		len[buffer_va_address]
+	buffer_count		len[buffer_va_address, int64]
 }
 
 # LIZ TODO: check item count/size
 kbase_ioctl_kinstr_prfcnt_setup {
 	request_item_count		len[requests_ptr, int32]
-	request_item_size		bytesize[requests_ptr, int32] 
+	request_item_size		bytesize[requests_ptr, int32]
 	requests_ptr			ptr64[in, prfcnt_request_item]
 	prfcnt_metadata_item_size	int32	(out_overlay)
 	prfcnt_mmap_size_bytes		int32
@@ -524,10 +545,10 @@ prfcnt_request_item {
 	u	prfcnt_request_union
 }
 
-#LIZ TODO: Check possible item_versions 
+# LIZ TODO: Check possible item_versions
 prfcnt_request_item_header {
 	item_type	flags[prfcnt_request_item_type, int16]
-	item_version	const[0, int16] 
+	item_version	const[0, int16]
 }
 
 prfcnt_request_union [
@@ -547,7 +568,7 @@ prfcnt_request_mode_union [
 ]
 
 periodic_config {
-	period_ns	uint64
+	period_ns	int64
 }
 
 # LIZ TODO: check item count/size
@@ -559,13 +580,13 @@ prfcnt_request_enable {
 }
 
 prfcnt_request_scope {
-	scope		flags[prfcnt_scope, uint8]
+	scope		flags[prfcnt_scope, int8]
 	pad		array[const[0, int8], 7]
 }
 
 kbase_ioctl_kinstr_prfcnt_enum_info {
 	info_item_size  	len[info_list_ptr, int32]
-	info_item_count		bytesize[info_list_ptr, int32] 
+	info_item_count		bytesize[info_list_ptr, int32]
 	info_list_ptr		prfcnt_enum_item
 }
 
@@ -574,16 +595,16 @@ prfcnt_enum_item {
 	u	prfcnt_enum_union
 }
 
-#LIZ TODO: Check possible item_versions 
+#LIZ TODO: Check possible item_versions
 prfcnt_enum_item_header {
-	item_type	flags[prfcnt_enum_item_type, int16]
+	item_type	flags[prfcnt_request_item_type, int16]
 	item_version	const[0, int16]
 }
 
 prfcnt_enum_union [
-	block_counter	prfcnt_enum_block_counter 
-	request		prfcnt_enum_request 
-	sample_info	prfcnt_enum_sample_info 
+	block_counter	prfcnt_enum_block_counter
+	request		prfcnt_enum_request
+	sample_info	prfcnt_enum_sample_info
 ] [varlen]
 
 prfcnt_enum_block_counter {
@@ -592,7 +613,7 @@ prfcnt_enum_block_counter {
 	pad		array[const[0, int8], 2]
 	num_instances   int16
 	num_values      int16
-	counter_mask	array[in64, 2]
+	counter_mask	array[int64, 2]
 }
 
 # LIZ TODO: Check possible versions for version_mask. Potentially 0x1
@@ -616,12 +637,12 @@ kbase_ioctl_context_priority_check {
 }
 
 # BASE_CSF_TILER_OOM_EXCEPTION_FLAG(1u << 0)=1
-csf_csi_flags = 1 
+csf_csi_flags = 1
 # LIZ TODO: From mali_kbase/mali_kbase_kinstr_prfcnt.c:1708; include NONE?
 prfcnt_request_enum_type = PRFCNT_ENUM_TYPE_BLOCK, PRFCNT_ENUM_TYPE_REQUEST, PRFCNT_ENUM_TYPE_SAMPLE_INFO
 prfcnt_request_item_type = PRFCNT_REQUEST_TYPE_MODE, PRFCNT_REQUEST_TYPE_ENABLE, PRFCNT_REQUEST_TYPE_SCOPE
 # 255 is the "RESERVED" flag
-prfcnt_scope = PRFCNT_SCOPE_GLOBAL, 255 
+prfcnt_scope = PRFCNT_SCOPE_GLOBAL, 255
 prfcnt_set = PRFCNT_SET_PRIMARY, PRFCNT_SET_SECONDARY, PRFCNT_SET_TERTIARY, 255
 prfcnt_block_type = PRFCNT_BLOCK_TYPE_FE, PRFCNT_BLOCK_TYPE_TILER, PRFCNT_BLOCK_TYPE_MEMORY, PRFCNT_BLOCK_TYPE_SHADER_CORE, 255
 prfcnt_mode = PRFCNT_MODE_MANUAL, PRFCNT_MODE_PERIODIC, 255

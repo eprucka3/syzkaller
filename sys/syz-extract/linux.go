@@ -141,7 +141,7 @@ func (*linux) processFile(arch *Arch, info *compiler.ConstInfo) (map[string]uint
 		"-I" + sourceDir,
 		"-I" + sourceDir + "/include/linux",
 		"-I" + buildDir + "/syzkaller",
-		"-include", sourceDir + "/include/linux/kconfig.h",
+		"-include", sourceDir + "/../../aosp/tools/include/linux/kconfig.h",
 	}
 	args = append(args, arch.target.CFlags...)
 	for _, incdir := range info.Incdirs {

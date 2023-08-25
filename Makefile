@@ -236,7 +236,9 @@ ifeq ($(TARGETOS),fuchsia)
 	$(MAKE) generate_fidl TARGETARCH=arm64
 else
 endif
-	bin/syz-extract -build -os=$(TARGETOS) -sourcedir=$(SOURCEDIR) $(FILES)
+	bin/syz-extract -os=linux -arch=arm64 -sourcedir=$(SOURCEDIR)/private/google-modules -builddir=$(SOURCEDIR)out/bazel/output_user_root/27840b671cf836fcae990b48f8894013/execroot/__main__/bazel-out/k8-fastbuild/bin/private/devices/google/shusky/zuma_shusky_config/out_dir -includedirs=$(SOURCEDIR)/aosp/tools/include,$(SOURCEDIR)/aosp/arch/arm64/include,$(SOURCEDIR)/out/cache/561cd1eb/aosp/arch/arm64/include/generated,$(SOURCEDIR)/out/cache/561cd1eb/aosp/arch/arm64/include,$(SOURCEDIR)/out/cache/561cd1eb/aosp/usr/include,$(SOURCEDIR)/prebuilts/build-tools/sysroots/aarch64-unknown-linux-musl/include dev_bifrost.txt
+
+
 
 bin/syz-extract:
 	GOOS=$(HOSTOS) GOARCH=$(HOSTARCH) $(HOSTGO) build $(GOHOSTFLAGS) -o $@ ./sys/syz-extract
