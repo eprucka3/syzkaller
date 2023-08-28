@@ -1,6 +1,3 @@
-# Copyright 2021 syzkaller project authors. All rights reserved.
-# Use of this source code is governed by Apache 2 LICENSE that can be found in the LICENSE file.
-
 # Generated on android14-gs-pixel-5.15-udc-d1
 
 include <gpu/mali_kbase/mali_kbase_debug.h>
@@ -14,7 +11,8 @@ resource gpu_addr[int64]: BASEP_MEM_INVALID_HANDLE, BASEP_MEM_WRITE_ALLOC_PAGES_
 resource user_addr[int64]: -1
 resource fd_fence[fd]
 resource fd_hwcnt[fd]
-resource fd_prfcnt[fd]
+# LIZ TODO: Investigate fd_prfcnt
+# resource fd_prfcnt[fd]
 
 openat$bifrost(fd const[AT_FDCWD], file ptr[in, string["/dev/bifrost"]], flags flags[open_flags], mode const[0]) fd_bifrost
 # Device name on Android
@@ -44,8 +42,8 @@ ioctl$KBASE_IOCTL_CS_QUEUE_KICK(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_KI
 ioctl$KBASE_IOCTL_CS_QUEUE_REGISTER(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_REGISTER], arg ptr[in, base_ioctl_cs_queue_register])
 ioctl$KBASE_IOCTL_VERSION_CHECK_RESERVED(fd fd_bifrost, cmd const[KBASE_IOCTL_VERSION_CHECK_RESERVED], arg ptr[inout, kbase_ioctl_version_check])
 ioctl$KBASE_IOCTL_BUFFER_LIVENESS_UPDATE(fd fd_bifrost, cmd const[KBASE_IOCTL_BUFFER_LIVENESS_UPDATE], arg ptr[in, kbase_ioctl_buffer_liveness_update])
-# LIZ TODO: Investicate fd_prfcnt ioctl
-ioctl$KBASE_IOCTL_KINSTR_PRFCNT_SETUP(fd fd_bifrost, cmd const[KBASE_IOCTL_KINSTR_PRFCNT_SETUP], arg ptr[inout, kbase_ioctl_kinstr_prfcnt_setup]) fd_prfcnt
+# LIZ TODO: Investicate return fd_prfcnt ioctl
+ioctl$KBASE_IOCTL_KINSTR_PRFCNT_SETUP(fd fd_bifrost, cmd const[KBASE_IOCTL_KINSTR_PRFCNT_SETUP], arg ptr[inout, kbase_ioctl_kinstr_prfcnt_setup])
 ioctl$KBASE_IOCTL_KINSTR_PRFCNT_ENUM_INFO(fd fd_bifrost, cmd const[KBASE_IOCTL_KINSTR_PRFCNT_ENUM_INFO], arg ptr[inout, kbase_ioctl_kinstr_prfcnt_enum_info])
 ioctl$KBASE_IOCTL_SET_LIMITED_CORE_COUNT(fd fd_bifrost, cmd const[KBASE_IOCTL_SET_LIMITED_CORE_COUNT], arg ptr[in, kbase_ioctl_set_limited_core_count])
 ioctl$KBASE_IOCTL_CONTEXT_PRIORITY_CHECK(fd fd_bifrost, cmd const[KBASE_IOCTL_CONTEXT_PRIORITY_CHECK], arg ptr[inout, kbase_ioctl_context_priority_check])
@@ -401,21 +399,24 @@ kbase_ioctl_cs_tiler_heap_init {
 	first_chunk_va		gpu_addr
 }
 
+# LIZ TODO: originally uint8, too small. Check al uint.
 kbase_ioctl_kcpu_queue_new {
-	id			int8[0:256]
+	id			int16[0:256]
 	pad			array[const[0, int8], 7]
 }
 
+# LIZ TODO: originally uint8, too small.
 kbase_ioctl_kcpu_queue_delete {
-	id			int8[0:256]
+	id			int16[0:256]
 	pad			array[const[0, int8], 7]
 }
 
 # addr			ptr64[out, array[kbase_kcpu_command_queue]]
+# LIZ TODO: originally uint8, too small. Check al uint.
 kbase_ioctl_kcpu_queue_enqueue {
 	addr			ptr64[out, gpu_addr]
 	nr_commands		len[addr, int32]
-	id			int8[0:256]
+	id			int16[0:256]
 	padding			array[const[0, int8], 3]
 }
 
@@ -425,7 +426,7 @@ kbase_ioctl_kcpu_queue_enqueue {
 # 	# Includes mutex. Potentially can get from kcpu_queue_new
 # }
 
-kbase_ioctl_cs_queue_terminate {
+kbase_ioctl_cs_queue_terminate  {
 	buffer_gpu_addr		ptr64[in, array[int8]]
 }
 
@@ -478,10 +479,6 @@ kbase_ioctl_cs_queue_group_create_1_6_out {
 	group_uid		int32
 }
 
-base_ioctl_cs_queue_terminate {
-	buffer_gpu_addr		ptr64[in, array[int8]]
-}
-
 #LIZ TODO: Check offset values.
 kbase_ioctl_cs_queue_register_ex {
 	buffer_gpu_addr		ptr64[in, array[int8]]
@@ -501,9 +498,10 @@ kbase_ioctl_cs_queue_bind [
 	out			kbase_ioctl_cs_queue_bind_out
 ]
 
+# LIZ TODO: originally uint8, too small. Check al uint.
 kbase_ioctl_cs_queue_bind_in {
 	buffer_gpu_addr		ptr64[in, array[int8]]
-	group_handle		int8[0:256]
+	group_handle		int16[0:256]
 	csi_index		int8
 	padding			array[const[0, int8], 6]
 }
@@ -523,11 +521,12 @@ base_ioctl_cs_queue_register {
 	padding			array[const[0, int8], 6]  (out_overlay)
 }
 
+# LIZ TODO: buffer_size check array length
 kbase_ioctl_buffer_liveness_update {
 	live_ranges_address	ptr64[in, array[user_addr]]
 	live_ranges_count	len[live_ranges_address, int64]
-	buffer_va_address	ptr64[in, array[user_addr]]
-	buffer_sizes_address	array[int64]
+	buffer_va_address	ptr64[in, array[int8]]
+	buffer_sizes_address	ptr64[in, array[int64]]
 	buffer_count		len[buffer_va_address, int64]
 }
 
@@ -618,7 +617,7 @@ prfcnt_enum_block_counter {
 
 # LIZ TODO: Check possible versions for version_mask. Potentially 0x1
 prfcnt_enum_request {
-	request_item_type	flags[prfcnt_request_item_type, int16]
+	request_item_type	flags[prfcnt_request_enum_type, int16]
 	pad			const[0, int16]
 	versions_mask   	const[0, int32]
 }
