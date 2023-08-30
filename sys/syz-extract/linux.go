@@ -142,6 +142,19 @@ func (*linux) processFile(arch *Arch, info *compiler.ConstInfo) (map[string]uint
 		"-I" + sourceDir + "/include/linux",
 		"-I" + buildDir + "/syzkaller",
 		"-include", sourceDir + "/../../aosp/tools/include/linux/kconfig.h",
+		"-DCONFIG_MALI_PIXEL_GPU_SSCD",
+		"-DCONFIG_MALI_PM_RUNTIME_S2MPU_CONTROL",
+		"-DCONFIG_MALI_PIXEL_GPU_SLEEP",
+		"-DCONFIG_MALI_PIXEL_GPU_HARD_FMAX",
+		"-DMALI_CUSTOMER_RELEASE=1",
+		"-DMALI_USE_CSF=1",
+		"-DMALI_KERNEL_TEST_API=1",
+		"-DMALI_UNIT_TEST=0",
+		"-DMALI_COVERAGE=0",
+		"-DMALI_JIT_PRESSURE_LIMIT_BASE=0",
+		"-DMALI_INCREMENTAL_RENDERING_JM=0",
+		"-DMALI_PLATFORM_DIR=pixel",
+		"-DMALI_KBASE_PLATFORM_PATH=/usr/local/google/home/lizprucka/android_repos/partner-android-kernel/aosp/../private/google-modules/gpu/mali_kbase/platform/pixel",
 	}
 	args = append(args, arch.target.CFlags...)
 	for _, incdir := range info.Incdirs {

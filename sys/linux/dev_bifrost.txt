@@ -1,9 +1,12 @@
 # Generated on android14-gs-pixel-5.15-udc-d1
 
+
 include <gpu/mali_kbase/mali_kbase_debug.h>
 include <gpu/common/include/uapi/gpu/arm/midgard/mali_kbase_hwcnt_reader.h>
-include <gpu/common/include/uapi/gpu/arm/midgard/mali_kbase_ioctl.h>
 include <gpu/common/include/uapi/gpu/arm/midgard/mali_base_kernel.h>
+# Note: CSF and non-csf builds have overlapping definitions; must define
+# "MALI_USE_CSF" when creating const.
+include <gpu/common/include/uapi/gpu/arm/midgard/mali_kbase_ioctl.h>
 include <uapi/linux/fcntl.h>
 
 resource fd_bifrost[fd]
@@ -29,8 +32,8 @@ ioctl$KBASE_IOCTL_CS_TILER_HEAP_TERM(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_TIL
 ioctl$KBASE_IOCTL_CS_TILER_HEAP_INIT_1_13(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_TILER_HEAP_INIT_1_13], arg ptr[inout, kbase_ioctl_cs_tiler_heap_init_1_13])
 ioctl$KBASE_IOCTL_CS_TILER_HEAP_INIT(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_TILER_HEAP_INIT], arg ptr[inout, kbase_ioctl_cs_tiler_heap_init])
 ioctl$KBASE_IOCTL_KCPU_QUEUE_ENQUEUE(fd fd_bifrost, cmd const[KBASE_IOCTL_KCPU_QUEUE_ENQUEUE], arg ptr[in, kbase_ioctl_kcpu_queue_enqueue])
-ioctl$KBASE_IOCTL_KCPU_QUEUE_DELETE(fd fd_bifrost, cmd const[BASE_IOCTL_KCPU_QUEUE_DELETE], arg ptr[in, kbase_ioctl_kcpu_queue_delete])
-ioctl$KBASE_IOCTL_KCPU_QUEUE_CREATE(fd fd_bifrost, cmd const[BASE_IOCTL_KCPU_QUEUE_CREATE], arg ptr[out, kbase_ioctl_kcpu_queue_new])
+ioctl$KBASE_IOCTL_KCPU_QUEUE_DELETE(fd fd_bifrost, cmd const[KBASE_IOCTL_KCPU_QUEUE_DELETE], arg ptr[in, kbase_ioctl_kcpu_queue_delete])
+ioctl$KBASE_IOCTL_KCPU_QUEUE_CREATE(fd fd_bifrost, cmd const[KBASE_IOCTL_KCPU_QUEUE_CREATE], arg ptr[out, kbase_ioctl_kcpu_queue_new])
 ioctl$KBASE_IOCTL_CS_EVENT_SIGNAL(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_EVENT_SIGNAL])
 ioctl$KBASE_IOCTL_CS_QUEUE_GROUP_TERMINATE(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_GROUP_TERMINATE], arg ptr[in, kbase_ioctl_cs_queue_terminate])
 ioctl$KBASE_IOCTL_CS_QUEUE_GROUP_CREATE(fd fd_bifrost, cmd const[KBASE_IOCTL_CS_QUEUE_GROUP_CREATE], arg ptr[inout, kbase_ioctl_cs_queue_group_create])
@@ -47,10 +50,6 @@ ioctl$KBASE_IOCTL_KINSTR_PRFCNT_SETUP(fd fd_bifrost, cmd const[KBASE_IOCTL_KINST
 ioctl$KBASE_IOCTL_KINSTR_PRFCNT_ENUM_INFO(fd fd_bifrost, cmd const[KBASE_IOCTL_KINSTR_PRFCNT_ENUM_INFO], arg ptr[inout, kbase_ioctl_kinstr_prfcnt_enum_info])
 ioctl$KBASE_IOCTL_SET_LIMITED_CORE_COUNT(fd fd_bifrost, cmd const[KBASE_IOCTL_SET_LIMITED_CORE_COUNT], arg ptr[in, kbase_ioctl_set_limited_core_count])
 ioctl$KBASE_IOCTL_CONTEXT_PRIORITY_CHECK(fd fd_bifrost, cmd const[KBASE_IOCTL_CONTEXT_PRIORITY_CHECK], arg ptr[inout, kbase_ioctl_context_priority_check])
-
-ioctl$KBASE_IOCTL_JOB_SUBMIT(fd fd_bifrost, cmd const[KBASE_IOCTL_JOB_SUBMIT], arg ptr[in, kbase_ioctl_job_submit])
-ioctl$KBASE_IOCTL_POST_TERM(fd fd_bifrost, cmd const[KBASE_IOCTL_POST_TERM], arg const[0])
-ioctl$KBASE_IOCTL_SOFT_EVENT_UPDATE(fd fd_bifrost, cmd const[KBASE_IOCTL_SOFT_EVENT_UPDATE], arg ptr[in, kbase_ioctl_soft_event_update])
 ioctl$KBASE_IOCTL_VERSION_CHECK(fd fd_bifrost, cmd const[KBASE_IOCTL_VERSION_CHECK], arg ptr[inout, kbase_ioctl_version_check])
 ioctl$KBASE_IOCTL_SET_FLAGS(fd fd_bifrost, cmd const[KBASE_IOCTL_SET_FLAGS], arg ptr[in, kbase_ioctl_set_flags])
 ioctl$KBASE_IOCTL_GET_GPUPROPS(fd fd_bifrost, cmd const[KBASE_IOCTL_GET_GPUPROPS], arg ptr[inout, kbase_ioctl_get_gpuprops])
@@ -58,9 +57,6 @@ ioctl$KBASE_IOCTL_MEM_ALLOC(fd fd_bifrost, cmd const[KBASE_IOCTL_MEM_ALLOC], arg
 ioctl$KBASE_IOCTL_MEM_QUERY(fd fd_bifrost, cmd const[KBASE_IOCTL_MEM_QUERY], arg ptr[inout, kbase_ioctl_mem_query])
 ioctl$KBASE_IOCTL_MEM_FREE(fd fd_bifrost, cmd const[KBASE_IOCTL_MEM_FREE], arg ptr[in, kbase_ioctl_mem_free])
 ioctl$KBASE_IOCTL_HWCNT_READER_SETUP(fd fd_bifrost, cmd const[KBASE_IOCTL_HWCNT_READER_SETUP], arg ptr[in, kbase_ioctl_hwcnt_reader_setup]) fd_hwcnt
-ioctl$KBASE_IOCTL_HWCNT_ENABLE(fd fd_bifrost, cmd const[KBASE_IOCTL_HWCNT_ENABLE], arg ptr[in, kbase_ioctl_hwcnt_enable])
-ioctl$KBASE_IOCTL_HWCNT_DUMP(fd fd_bifrost, cmd const[KBASE_IOCTL_HWCNT_DUMP], arg const[0])
-ioctl$KBASE_IOCTL_HWCNT_CLEAR(fd fd_bifrost, cmd const[KBASE_IOCTL_HWCNT_CLEAR], arg const[0])
 ioctl$KBASE_IOCTL_HWCNT_SET(fd fd_bifrost, cmd const[KBASE_IOCTL_HWCNT_SET], arg ptr[inout, kbase_ioctl_hwcnt_values])
 ioctl$KBASE_IOCTL_DISJOINT_QUERY(fd fd_bifrost, cmd const[KBASE_IOCTL_DISJOINT_QUERY], arg ptr[out, kbase_ioctl_disjoint_query])
 ioctl$KBASE_IOCTL_GET_DDK_VERSION(fd fd_bifrost, cmd const[KBASE_IOCTL_GET_DDK_VERSION], arg ptr[inout, kbase_ioctl_get_ddk_version])
@@ -94,46 +90,6 @@ ioctl$KBASE_HWCNT_READER_SET_INTERVAL(fd fd_hwcnt, cmd const[KBASE_HWCNT_READER_
 ioctl$KBASE_HWCNT_READER_ENABLE_EVENT(fd fd_hwcnt, cmd const[KBASE_HWCNT_READER_ENABLE_EVENT], arg const[0])
 ioctl$KBASE_HWCNT_READER_DISABLE_EVENT(fd fd_hwcnt, cmd const[KBASE_HWCNT_READER_DISABLE_EVENT], arg const[0])
 ioctl$KBASE_HWCNT_READER_GET_API_VERSION(fd fd_hwcnt, cmd const[KBASE_HWCNT_READER_GET_API_VERSION], arg const[0])
-
-type base_atom_id int8
-
-base_jd_atom_v2 {
-	jc		int64
-	udata		base_jd_udata
-	extres_list	int64
-	nr_extres	int16
-	compat_core_req	int16
-	pre_dep		array[base_dependency, 2]
-	atom_number	base_atom_id
-	prio		flags[base_jd_prio, int8]
-	device_nr	int8
-	jobslot		int8
-	core_req	flags[base_jd_core_req, int32]
-	renderpass_id	int8
-	padding		array[const[0, int8], 7]
-}
-
-base_dependency {
-	atom_id		base_atom_id
-	dependency_type	flags[base_jd_dep_type, int8]
-}
-
-base_jd_udata {
-	blob	array[int64, 2]
-}
-
-kbase_ioctl_job_submit {
-	addr		ptr64[out, array[base_jd_atom_v2]]
-	nr_atoms	len[addr, int32]
-# sizeof(base_jd_atom_v2)
-	stride		const[56, int32]
-}
-
-kbase_ioctl_soft_event_update {
-	event		gpu_addr
-	new_status	int32
-	flags		const[0, int32]
-}
 
 kbase_ioctl_version_check {
 	major	int16
@@ -171,14 +127,6 @@ kbase_ioctl_mem_free {
 
 kbase_ioctl_hwcnt_reader_setup {
 	buffer_count	int32
-	jm_bm		int32
-	shader_bm	int32
-	tiler_bm	int32
-	mmu_l2_bm	int32
-}
-
-kbase_ioctl_hwcnt_enable {
-	dump_buffer	gpu_addr
 	jm_bm		int32
 	shader_bm	int32
 	tiler_bm	int32
@@ -635,23 +583,18 @@ kbase_ioctl_context_priority_check {
 	priority		int8
 }
 
-# BASE_CSF_TILER_OOM_EXCEPTION_FLAG(1u << 0)=1
-csf_csi_flags = 1
+csf_csi_flags = BASE_CSF_TILER_OOM_EXCEPTION_FLAG
 # LIZ TODO: From mali_kbase/mali_kbase_kinstr_prfcnt.c:1708; include NONE?
 prfcnt_request_enum_type = PRFCNT_ENUM_TYPE_BLOCK, PRFCNT_ENUM_TYPE_REQUEST, PRFCNT_ENUM_TYPE_SAMPLE_INFO
 prfcnt_request_item_type = PRFCNT_REQUEST_TYPE_MODE, PRFCNT_REQUEST_TYPE_ENABLE, PRFCNT_REQUEST_TYPE_SCOPE
-# 255 is the "RESERVED" flag
-prfcnt_scope = PRFCNT_SCOPE_GLOBAL, 255
-prfcnt_set = PRFCNT_SET_PRIMARY, PRFCNT_SET_SECONDARY, PRFCNT_SET_TERTIARY, 255
-prfcnt_block_type = PRFCNT_BLOCK_TYPE_FE, PRFCNT_BLOCK_TYPE_TILER, PRFCNT_BLOCK_TYPE_MEMORY, PRFCNT_BLOCK_TYPE_SHADER_CORE, 255
-prfcnt_mode = PRFCNT_MODE_MANUAL, PRFCNT_MODE_PERIODIC, 255
-base_jd_dep_type = BASE_JD_DEP_TYPE_INVALID, BASE_JD_DEP_TYPE_DATA, BASE_JD_DEP_TYPE_ORDER
-base_jd_prio = BASE_JD_PRIO_MEDIUM, BASE_JD_PRIO_HIGH, BASE_JD_PRIO_LOW
-base_jd_core_req = BASE_JD_REQ_DEP, BASE_JD_REQ_FS, BASE_JD_REQ_CS, BASE_JD_REQ_T, BASE_JD_REQ_CF, BASE_JD_REQ_V, BASE_JD_REQ_FS_AFBC, BASE_JD_REQ_EVENT_COALESCE, BASE_JD_REQ_COHERENT_GROUP, BASE_JD_REQ_PERMON, BASE_JD_REQ_EXTERNAL_RESOURCES, BASE_JD_REQ_SOFT_JOB, BASE_JD_REQ_ONLY_COMPUTE, BASE_JD_REQ_SPECIFIC_COHERENT_GROUP, BASE_JD_REQ_EVENT_ONLY_ON_FAILURE, BASE_JD_REQ_SKIP_CACHE_START, BASE_JD_REQ_SKIP_CACHE_END, BASE_JD_REQ_JOB_SLOT, BASE_JD_REQ_START_RENDERPASS, BASE_JD_REQ_END_RENDERPASS
+prfcnt_scope = PRFCNT_SCOPE_GLOBAL, PRFCNT_SCOPE_RESERVED
+prfcnt_set = PRFCNT_SET_PRIMARY, PRFCNT_SET_SECONDARY, PRFCNT_SET_TERTIARY, PRFCNT_SET_RESERVED
+prfcnt_block_type = PRFCNT_BLOCK_TYPE_FE, PRFCNT_BLOCK_TYPE_TILER, PRFCNT_BLOCK_TYPE_MEMORY, PRFCNT_BLOCK_TYPE_SHADER_CORE, PRFCNT_BLOCK_TYPE_RESERVED
+prfcnt_mode = PRFCNT_MODE_MANUAL, PRFCNT_MODE_PERIODIC, PRFNCT_MODE_RESERVED
 kbase_ioctl_mem_query_flags = KBASE_MEM_QUERY_COMMIT_SIZE, KBASE_MEM_QUERY_VA_SIZE, KBASE_MEM_QUERY_FLAGS
 base_syncset_op_flags = BASE_SYNCSET_OP_MSYNC, BASE_SYNCSET_OP_CSYNC
 # 0x400000-0x2000000 are individual bits of BASE_MEM_GROUP_ID_MASK
-base_mem_alloc_flags = BASE_MEM_PROT_CPU_RD, BASE_MEM_PROT_CPU_WR, BASE_MEM_PROT_GPU_RD, BASE_MEM_PROT_GPU_WR, BASE_MEM_PROT_GPU_EX, BASEP_MEM_PERMANENT_KERNEL_MAPPING, BASE_MEM_GPU_VA_SAME_4GB_PAGE, BASEP_MEM_NO_USER_FREE, BASE_MEM_RESERVED_BIT_8, BASE_MEM_GROW_ON_GPF, BASE_MEM_COHERENT_SYSTEM, BASE_MEM_COHERENT_LOCAL, BASE_MEM_CACHED_CPU, BASE_MEM_SAME_VA, BASE_MEM_NEED_MMAP, BASE_MEM_COHERENT_SYSTEM_REQUIRED, BASE_MEM_PROTECTED, BASE_MEM_DONT_NEED, BASE_MEM_IMPORT_SHARED, BASE_MEM_RESERVED_BIT_19, BASE_MEM_TILER_ALIGN_TOP_EXTENT_MAX_PAGES, BASE_MEM_TILER_ALIGN_TOP, BASE_MEM_UNCACHED_GPU, 0x400000, 0x800000, 0x1000000, 0x2000000, BASE_MEM_IMPORT_SYNC_ON_MAP_UNMAP, BASE_MEM_FLAG_MAP_FIXED
+base_mem_alloc_flags = BASE_MEM_PROT_CPU_RD, BASE_MEM_PROT_CPU_WR, BASE_MEM_PROT_GPU_RD, BASE_MEM_PROT_GPU_WR, BASE_MEM_PROT_GPU_EX, BASEP_MEM_PERMANENT_KERNEL_MAPPING, BASE_MEM_GPU_VA_SAME_4GB_PAGE, BASEP_MEM_NO_USER_FREE, BASE_MEM_GROW_ON_GPF, BASE_MEM_COHERENT_SYSTEM, BASE_MEM_COHERENT_LOCAL, BASE_MEM_CACHED_CPU, BASE_MEM_SAME_VA, BASE_MEM_NEED_MMAP, BASE_MEM_COHERENT_SYSTEM_REQUIRED, BASE_MEM_PROTECTED, BASE_MEM_DONT_NEED, BASE_MEM_IMPORT_SHARED, BASE_MEM_UNCACHED_GPU, BASEP_MEM_GROUP_ID_SHIFT, 0x400000, 0x800000, 0x1000000, 0x2000000, BASE_MEM_IMPORT_SYNC_ON_MAP_UNMAP, BASE_MEM_FIXED, BASE_MEM_CSF_EVENT, BASE_MEM_RESERVED_BIT_20, BASE_MEM_FIXABLE
 base_mem_import_type = BASE_MEM_IMPORT_TYPE_INVALID, BASE_MEM_IMPORT_TYPE_UMM, BASE_MEM_IMPORT_TYPE_USER_BUFFER
 # 0x08-0x20 are individual bits of BASEP_CONTEXT_MMU_GROUP_ID_MASK
 basep_context_create_kernel_flags = BASE_CONTEXT_SYSTEM_MONITOR_SUBMIT_DISABLED, 0x8, 0x10, 0x20, 0x40
