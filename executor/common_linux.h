@@ -2091,7 +2091,7 @@ struct btf_header {
 };
 
 #define BTF_INFO_KIND(info) (((info) >> 24) & 0x0f)
-#define BTF_INFO_VLEN(info) ((info)&0xffff)
+#define BTF_INFO_VLEN(info) ((info) & 0xffff)
 
 #define BTF_KIND_INT 1
 #define BTF_KIND_ARRAY 3
@@ -5511,6 +5511,7 @@ static long handle_clone_ret(long ret)
 static long syz_clone(volatile long flags, volatile long stack, volatile long stack_len,
 		      volatile long ptid, volatile long ctid, volatile long tls)
 {
+	debug("LIZ: start clone");
 	// ABI requires 16-byte stack alignment.
 	long sp = (stack + stack_len) & ~15;
 #if SYZ_EXECUTOR || SYZ_HANDLE_SEGV
@@ -5518,7 +5519,9 @@ static long syz_clone(volatile long flags, volatile long stack, volatile long st
 #endif
 	// Clear the CLONE_VM flag. Otherwise it'll very likely corrupt syz-executor.
 	long ret = (long)syscall(__NR_clone, flags & ~CLONE_VM, sp, ptid, ctid, tls);
-	return handle_clone_ret(ret);
+	long out = handle_clone_ret(ret);
+	debug("LIZ: end clone");
+	return out;
 }
 #endif
 

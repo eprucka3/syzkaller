@@ -203,6 +203,9 @@ func parse(s *bufio.Scanner) ([]Frame, error) {
 			lineEnd++
 		}
 		file := ln[:colon]
+		// if strings.Contains(file, "fork") {
+		// 	fmt.Printf("0x%x\n", pc)
+		// }
 		line, err := strconv.Atoi(ln[colon+1 : lineEnd])
 		if err != nil || fn == "" || fn == "??" || file == "" || file == "??" || line <= 0 {
 			continue

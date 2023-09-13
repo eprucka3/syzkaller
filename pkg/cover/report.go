@@ -166,9 +166,13 @@ func (rg *ReportGenerator) lazySymbolize(progs []Prog) error {
 			}
 			uniquePCs[pc] = true
 			sym := rg.findSymbol(pc)
+			// return nil
+			// fmt.Printf("%v ", pc)
+			// LIZ NOTE: Cheetah fails to find symbols.
 			if sym == nil || (sym.Symbolized || symbolize[sym]) {
 				continue
 			}
+			// fmt.Printf("%v ", pc)
 			symbolize[sym] = true
 			pcs[sym.Module] = append(pcs[sym.Module], sym.PCs...)
 		}
@@ -213,6 +217,9 @@ func getFile(files map[string]*file, name, path, module string) *file {
 }
 
 func (rg *ReportGenerator) findSymbol(pc uint64) *backend.Symbol {
+	// fmt.Printf("LIZ: in findSymbol\n")
+	// fmt.Printf("pc: 0x%x\n", pc)
+	// fmt.Printf("symbol ex: 0x%x\n", rg.Symbols[0].Start)
 	idx := sort.Search(len(rg.Symbols), func(i int) bool {
 		return pc < rg.Symbols[i].End
 	})

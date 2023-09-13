@@ -265,6 +265,9 @@ func buildSymbols(symbols []*Symbol, ranges []pcRange, coverPoints [2][]uint64) 
 			*symbPCs = (*unitPCs)[pos:]
 		}
 	}
+	// for _, s := range symbols {
+	// 	fmt.Printf("Module: %v\nStart: 0x%x\nEnd: 0x%x\n", s.Module.Name, s.Start, s.End)
+	// }
 	return symbols
 }
 
@@ -340,6 +343,11 @@ func symbolizeModule(target *targets.Target, objDir, srcDir, buildDir string,
 		minProcs = 1
 		maxProcs = 4
 	)
+	if mod.Name == "mali_kbase" {
+		for _, pc := range pcs {
+			fmt.Printf("0x%x\n", pc)
+		}
+	}
 	// addr2line on a beefy vmlinux takes up to 1.6GB of RAM, so don't create too many of them.
 	if procs > maxProcs {
 		procs = maxProcs
@@ -413,6 +421,7 @@ func symbolize(target *targets.Target, objDir, srcDir, buildDir string,
 	pcs map[*Module][]uint64) ([]Frame, error) {
 	var frames []Frame
 	for mod, pcs1 := range pcs {
+		// fmt.Printf("Mod: %v, pcs1: %v", mod, pcs1)
 		frames1, err := symbolizeModule(target, objDir, srcDir, buildDir, mod, pcs1)
 		if err != nil {
 			return nil, err
