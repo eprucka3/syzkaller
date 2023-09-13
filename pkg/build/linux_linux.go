@@ -36,7 +36,9 @@ func embedFiles(params Params, callback func(mountDir string) error) error {
 	if params.CmdlineFile != "" {
 		return fmt.Errorf("cmdline file is not supported for linux images")
 	}
-	tempDir, err := os.MkdirTemp("", "syz-build")
+	// tempDir, err := os.MkdirTemp("", "syz-build")
+	tempDir := "/tmp/syz-build-test"
+	err := osutil.MkdirAll(tempDir)
 	if err != nil {
 		return err
 	}
