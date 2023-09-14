@@ -510,6 +510,7 @@ func (inst *instance) boot() error {
 	}
 	inst.args = args
 	qemu := osutil.Command(inst.cfg.Qemu, args...)
+	log.Logf(0, "LIZ_TESTING: Qemu command: %v", qemu.Args)
 	qemu.Stdout = inst.wpipe
 	qemu.Stderr = inst.wpipe
 	if err := qemu.Start(); err != nil {
