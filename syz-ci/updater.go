@@ -226,6 +226,7 @@ func (upd *SyzUpdater) build(commit *vcs.Commit) error {
 	defer buildSem.Signal()
 
 	if upd.descriptions != "" {
+		log.Logf(0, "Descriptions Dir: %v\n", upd.descriptions)
 		files, err := os.ReadDir(upd.descriptions)
 		if err != nil {
 			return fmt.Errorf("failed to read descriptions dir: %w", err)
@@ -246,6 +247,7 @@ func (upd *SyzUpdater) build(commit *vcs.Commit) error {
 			if err := osutil.CopyFile(src, dst); err != nil {
 				return err
 			}
+			log.Logf(0, "Copied \n%v\nto\n%v\n", src, dst)
 		}
 		cmd := osutil.Command(instance.MakeBin, "generate")
 		cmd.Dir = upd.syzkallerDir
