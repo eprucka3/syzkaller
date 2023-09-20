@@ -222,8 +222,10 @@ func (upd *SyzUpdater) build(commit *vcs.Commit) error {
 	// syzkaller testing may be slowed down by concurrent kernel builds too much
 	// and cause timeout failures, so we serialize it with other builds:
 	// https://groups.google.com/forum/#!msg/syzkaller-openbsd-bugs/o-G3vEsyQp4/f_nFpoNKBQAJ
+	log.Logf(0, "LIZ_TESTING: In build()\n")
 	buildSem.Wait()
 	defer buildSem.Signal()
+	log.Logf(0, "LIZ_TESTING: Checking descriptions\n")
 
 	if upd.descriptions != "" {
 		log.Logf(0, "Descriptions Dir: %v\n", upd.descriptions)
