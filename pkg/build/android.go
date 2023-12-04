@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"github.com/google/syzkaller/pkg/config"
+	"github.com/google/syzkaller/pkg/log"
 	"github.com/google/syzkaller/pkg/osutil"
 )
 
@@ -85,6 +86,7 @@ func (a android) build(params Params) (ImageDetails, error) {
 	cmd.Env = append(cmd.Env, "OUT_DIR=out", "DIST_DIR=dist", fmt.Sprintf("GKI_DEFCONFIG_FRAGMENT=%v",
 		buildCfg.DefconfigFragment), fmt.Sprintf("BUILD_TARGET=%v", buildCfg.BuildTarget))
 
+	log.Logf(0, "LIZ_TESTING: KernelDir: %v", params.KernelDir)
 	if _, err := osutil.Run(time.Hour, cmd); err != nil {
 		return details, fmt.Errorf("failed to build kernel: %w", err)
 	}
