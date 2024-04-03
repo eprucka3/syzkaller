@@ -176,10 +176,12 @@ var testSem = instance.NewSemaphore(1)
 const fuzzingMinutesBeforeCover = 360
 
 func (mgr *Manager) loop() {
+	log.Logf(0, "LIZ_TESTING: starting loop")
 	lastCommit := ""
 	nextBuildTime := time.Now()
 	var managerRestartTime, artifactUploadTime time.Time
 	latestInfo := mgr.checkLatest()
+	log.Logf(0, "LIZ_TESTING: latestInfo: %v", latestInfo)
 	if latestInfo != nil && time.Since(latestInfo.Time) < kernelRebuildPeriod/2 &&
 		mgr.managercfg.TargetOS != targets.Fuchsia {
 		// If we have a reasonably fresh build,
@@ -251,6 +253,7 @@ func (mgr *Manager) pollAndBuild(lastCommit string, latestInfo *BuildInfo) (
 	commit, err := mgr.repo.Poll(mgr.mgrcfg.Repo, mgr.mgrcfg.Branch)
 	if err != nil {
 		mgr.buildFailed = true
+		log.Logf(0, "LIZ_TESTING: in pollAndBuild")
 		mgr.Errorf("failed to poll: %v", err)
 	} else {
 		log.Logf(0, "%v: poll: %v", mgr.name, commit.Hash)
@@ -296,17 +299,22 @@ type BuildInfo struct {
 }
 
 func loadBuildInfo(dir string) (*BuildInfo, error) {
+	log.Logf(0, "LIZ_TESTING: in loadBuildInfo()")
 	info := new(BuildInfo)
 	if err := config.LoadFile(filepath.Join(dir, "tag"), info); err != nil {
+		log.Logf(0, "LIZ_TESTING: failed to get tag: %v", err)
 		return nil, err
 	}
+	log.Logf(0, "LIZ_TESTING: info: %v", info)
 	return info, nil
 }
 
 // checkLatest checks if we have a good working latest build and returns its build info.
 // If the build is missing/broken, nil is returned.
 func (mgr *Manager) checkLatest() *BuildInfo {
+	log.Logf(0, "LIZ_TESTING: in checkLatest()")
 	if !osutil.FilesExist(mgr.latestDir, imageFiles) {
+		log.Logf(0, "LIZ_TESTING: Missing image files")
 		return nil
 	}
 	info, _ := loadBuildInfo(mgr.latestDir)
